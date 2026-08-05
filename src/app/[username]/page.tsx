@@ -122,7 +122,7 @@ export default async function PublicProfilePage({
         </div>
       )}
 
-      {profile.plan !== "pro" && (
+      {(profile.plan !== "pro" || isPoster) && (
         <Link
           href="/"
           className={`mt-10 text-xs font-medium opacity-70 transition-opacity hover:opacity-100 ${theme.subtext}`}
@@ -249,7 +249,7 @@ function PosterHeader({
         </div>
       )}
 
-      <div className="relative mx-auto flex w-full max-w-sm flex-col items-center px-6 py-10 pb-16">
+      <div className="relative mx-auto flex w-full max-w-md flex-col items-center px-6 py-12 pb-16 sm:max-w-lg">
         {/* one unified card: photo on top, everything else flows below inside the same rounded shell */}
         <div style={customVars} className={`w-full overflow-hidden rounded-3xl shadow-2xl ${theme.page}`}>
           <div className="relative aspect-[4/5] w-full overflow-hidden">
@@ -258,26 +258,28 @@ function PosterHeader({
                 src={profile.avatar_url}
                 alt={profile.display_name ?? profile.username}
                 fill
-                sizes="400px"
+                sizes="(min-width: 640px) 512px, 448px"
                 priority
                 className="object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-6xl font-bold text-white">
+              <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-7xl font-bold text-white">
                 {initial}
               </div>
             )}
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-            <div className="absolute inset-x-0 bottom-5 px-5">
-              <p className="text-2xl font-extrabold text-white drop-shadow-md">
+            <div className="absolute inset-x-0 bottom-6 px-6">
+              <p className="text-3xl font-extrabold text-white drop-shadow-md">
                 {profile.display_name ?? profile.username}
               </p>
-              {profile.display_name && <p className="text-sm text-white/80">@{profile.username}</p>}
+              {profile.display_name && <p className="mt-0.5 text-sm text-white/80">@{profile.username}</p>}
             </div>
           </div>
 
-          <div className="p-5">
-            {profile.bio && <p className={`text-center text-sm leading-relaxed ${theme.subtext}`}>{profile.bio}</p>}
+          <div className="p-6 sm:p-7">
+            {profile.bio && (
+              <p className={`text-center text-sm leading-relaxed ${theme.subtext}`}>{profile.bio}</p>
+            )}
             {children}
           </div>
         </div>

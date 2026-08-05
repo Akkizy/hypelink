@@ -531,6 +531,7 @@ function PosterPreviewCard({
                 outro link
               </div>
             </div>
+            <p className={`mt-4 text-center text-[10px] font-medium opacity-70 ${theme.subtext}`}>feito com hyperlink</p>
           </div>
         </div>
       </div>

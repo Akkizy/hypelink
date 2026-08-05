@@ -96,6 +96,7 @@ export function PreviewPanel({
                 <div className="mt-3 flex w-full flex-col gap-3">
                   <LinkGroups groups={groups} cardClassName={`${theme.card} ${theme.link}`} subtextClassName={theme.subtext} />
                 </div>
+                <p className={`mt-4 text-center text-[10px] font-medium opacity-70 ${theme.subtext}`}>feito com hyperlink</p>
               </div>
             </div>
           </div>
