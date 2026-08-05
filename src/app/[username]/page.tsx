@@ -250,36 +250,36 @@ function PosterHeader({
       )}
 
       <div className="relative mx-auto flex w-full max-w-sm flex-col items-center px-6 py-10 pb-16">
-        {/* poster card */}
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl shadow-2xl">
-          {profile.avatar_url ? (
-            <Image
-              src={profile.avatar_url}
-              alt={profile.display_name ?? profile.username}
-              fill
-              sizes="400px"
-              priority
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-6xl font-bold text-white">
-              {initial}
+        {/* one unified card: photo on top, everything else flows below inside the same rounded shell */}
+        <div style={customVars} className={`w-full overflow-hidden rounded-3xl shadow-2xl ${theme.page}`}>
+          <div className="relative aspect-[4/5] w-full overflow-hidden">
+            {profile.avatar_url ? (
+              <Image
+                src={profile.avatar_url}
+                alt={profile.display_name ?? profile.username}
+                fill
+                sizes="400px"
+                priority
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-6xl font-bold text-white">
+                {initial}
+              </div>
+            )}
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute inset-x-0 bottom-5 px-5">
+              <p className="text-2xl font-extrabold text-white drop-shadow-md">
+                {profile.display_name ?? profile.username}
+              </p>
+              {profile.display_name && <p className="text-sm text-white/80">@{profile.username}</p>}
             </div>
-          )}
-          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-          <div className="absolute inset-x-0 bottom-5 px-5">
-            <p className="text-2xl font-extrabold text-white drop-shadow-md">
-              {profile.display_name ?? profile.username}
-            </p>
-            {profile.display_name && <p className="text-sm text-white/80">@{profile.username}</p>}
           </div>
-        </div>
 
-        {profile.bio && <p className="mt-4 text-center text-sm leading-relaxed text-white/80">{profile.bio}</p>}
-
-        {/* rounded panel — colors follow the chosen theme */}
-        <div style={customVars} className={`mt-6 w-full rounded-3xl p-5 shadow-xl ${theme.page}`}>
-          {children}
+          <div className="p-5">
+            {profile.bio && <p className={`text-center text-sm leading-relaxed ${theme.subtext}`}>{profile.bio}</p>}
+            {children}
+          </div>
         </div>
       </div>
     </main>

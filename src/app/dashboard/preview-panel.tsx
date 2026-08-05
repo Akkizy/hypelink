@@ -74,26 +74,28 @@ export function PreviewPanel({
                 <div className="absolute inset-0 bg-black/50" />
               </div>
             )}
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl shadow-xl">
-              {profile.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-3xl font-bold text-white">
-                  {initial}
+            <div style={customVars} className={`relative w-full overflow-hidden rounded-2xl shadow-xl ${theme.page}`}>
+              <div className="relative aspect-[4/5] w-full overflow-hidden">
+                {profile.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-3xl font-bold text-white">
+                    {initial}
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                <div className="absolute inset-x-0 bottom-3 px-3">
+                  <p className="text-sm font-extrabold text-white drop-shadow-md">
+                    {profile.display_name || `@${profile.username}`}
+                  </p>
                 </div>
-              )}
-              <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-              <div className="absolute inset-x-0 bottom-3 px-3">
-                <p className="text-sm font-extrabold text-white drop-shadow-md">
-                  {profile.display_name || `@${profile.username}`}
-                </p>
               </div>
-            </div>
-            {profile.bio && <p className="relative mt-3 text-center text-[11px] leading-snug text-white/80">{profile.bio}</p>}
-            <div style={customVars} className={`relative mt-4 w-full rounded-2xl p-3 shadow-lg ${theme.page}`}>
-              <div className="flex w-full flex-col gap-3">
-                <LinkGroups groups={groups} cardClassName={`${theme.card} ${theme.link}`} subtextClassName={theme.subtext} />
+              <div className="p-3">
+                {profile.bio && <p className={`text-center text-[11px] leading-snug ${theme.subtext}`}>{profile.bio}</p>}
+                <div className="mt-3 flex w-full flex-col gap-3">
+                  <LinkGroups groups={groups} cardClassName={`${theme.card} ${theme.link}`} subtextClassName={theme.subtext} />
+                </div>
               </div>
             </div>
           </div>

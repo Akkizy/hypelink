@@ -506,29 +506,30 @@ function PosterPreviewCard({
             <div className="absolute inset-0 bg-black/50" />
           </div>
         )}
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl shadow-xl">
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-3xl font-bold text-white">
-              {initial}
+        <div style={customVars} className={`relative w-full overflow-hidden rounded-2xl shadow-xl ${theme.page}`}>
+          <div className="relative aspect-[4/5] w-full overflow-hidden">
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-3xl font-bold text-white">
+                {initial}
+              </div>
+            )}
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+            <div className="absolute inset-x-0 bottom-3 px-3">
+              <p className="text-sm font-extrabold text-white drop-shadow-md">{displayName || `@${username}`}</p>
             </div>
-          )}
-          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-          <div className="absolute inset-x-0 bottom-3 px-3">
-            <p className="text-sm font-extrabold text-white drop-shadow-md">{displayName || `@${username}`}</p>
           </div>
-        </div>
-        {bio && <p className="relative mt-3 text-center text-[11px] leading-snug text-white/80">{bio}</p>}
-
-        <div style={customVars} className={`relative mt-4 w-full rounded-2xl p-3 shadow-lg ${theme.page}`}>
-          <div className="flex w-full flex-col gap-1.5">
-            <div className={`flex h-9 w-full items-center justify-center rounded-lg text-[11px] font-medium ${theme.card} ${theme.link}`}>
-              seu link aqui
-            </div>
-            <div className={`flex h-9 w-full items-center justify-center rounded-lg text-[11px] font-medium ${theme.card} ${theme.link}`}>
-              outro link
+          <div className="p-3">
+            {bio && <p className={`text-center text-[11px] leading-snug ${theme.subtext}`}>{bio}</p>}
+            <div className="mt-3 flex w-full flex-col gap-1.5">
+              <div className={`flex h-9 w-full items-center justify-center rounded-lg text-[11px] font-medium ${theme.card} ${theme.link}`}>
+                seu link aqui
+              </div>
+              <div className={`flex h-9 w-full items-center justify-center rounded-lg text-[11px] font-medium ${theme.card} ${theme.link}`}>
+                outro link
+              </div>
             </div>
           </div>
         </div>
