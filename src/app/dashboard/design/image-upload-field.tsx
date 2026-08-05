@@ -41,7 +41,12 @@ export function ImageUploadField({
       setPreview(uploadedUrl);
       onChange(uploadedUrl);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao enviar imagem.");
+      const message = err instanceof Error ? err.message : "";
+      setError(
+        message && !message.includes("unexpected response")
+          ? message
+          : "Falha na conexão — atualize a página (Ctrl+Shift+R) e tente de novo.",
+      );
       setPreview(currentUrl);
       onChange(currentUrl);
     } finally {
@@ -95,7 +100,7 @@ export function ImageUploadField({
         }}
       />
       {error && <p className="text-xs text-red-600">{error}</p>}
-      <p className="text-[11px] text-black/40">PNG, JPG, WEBP ou GIF — até 10MB.</p>
+      <p className="text-[11px] text-black/40">PNG, JPG, WEBP ou GIF — até 4MB.</p>
     </div>
   );
 }

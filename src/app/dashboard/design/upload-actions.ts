@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const MAX_SIZE = 10 * 1024 * 1024;
+const MAX_SIZE = 4 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 const EXT_BY_TYPE: Record<string, string> = {
   "image/png": "png",
@@ -39,7 +39,7 @@ async function uploadImage(file: File, kind: Kind): Promise<string> {
     throw new Error("Formato não suportado. Use PNG, JPG, WEBP ou GIF.");
   }
   if (file.size > MAX_SIZE) {
-    throw new Error("Imagem muito grande (máx. 10MB).");
+    throw new Error("Imagem muito grande (máx. 4MB).");
   }
 
   const { supabase, user, profile } = await requireUserAndProfile();
