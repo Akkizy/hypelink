@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { THEMES } from "@/lib/themes";
-import { isValidUrl } from "@/lib/utils";
+import { FONTS } from "@/lib/fonts";
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
@@ -18,14 +18,16 @@ export async function updateProfile(formData: FormData) {
   const displayName = String(formData.get("display_name") ?? "").trim();
   const bio = String(formData.get("bio") ?? "").trim();
   const theme = String(formData.get("theme") ?? "default");
-  const avatarUrl = String(formData.get("avatar_url") ?? "").trim();
+  const font = String(formData.get("font") ?? "sans");
 
-  const selected = THEMES.find((t) => t.id === theme);
-  if (!selected || (selected.pro && profile.plan !== "pro")) {
+  const selectedTheme = THEMES.find((t) => t.id === theme);
+  if (!selectedTheme || (selectedTheme.pro && profile.plan !== "pro")) {
     throw new Error("Tema disponível apenas no plano PRO.");
   }
-  if (avatarUrl && !isValidUrl(avatarUrl)) {
-    throw new Error("URL de avatar inválida.");
+
+  const selectedFont = FONTS.find((f) => f.id === font);
+  if (!selectedFont || (selectedFont.pro && profile.plan !== "pro")) {
+    throw new Error("Fonte disponível apenas no plano PRO.");
   }
 
   await supabase
@@ -34,7 +36,7 @@ export async function updateProfile(formData: FormData) {
       display_name: displayName || null,
       bio: bio || null,
       theme,
-      avatar_url: avatarUrl || null,
+      font,
     })
     .eq("id", user.id);
 

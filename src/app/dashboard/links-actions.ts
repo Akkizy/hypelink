@@ -21,6 +21,7 @@ export async function createLink(formData: FormData) {
   const { supabase, user } = await requireUser();
   const title = String(formData.get("title") ?? "").trim();
   const url = String(formData.get("url") ?? "").trim();
+  const categoryId = String(formData.get("category_id") ?? "").trim() || null;
 
   if (!title || !isValidUrl(url)) {
     throw new Error("Título ou URL inválidos.");
@@ -40,6 +41,7 @@ export async function createLink(formData: FormData) {
     profile_id: user.id,
     title,
     url,
+    category_id: categoryId,
     position: nextPosition,
   });
 
@@ -52,12 +54,13 @@ export async function updateLink(id: string, formData: FormData) {
   const { supabase, user } = await requireUser();
   const title = String(formData.get("title") ?? "").trim();
   const url = String(formData.get("url") ?? "").trim();
+  const categoryId = String(formData.get("category_id") ?? "").trim() || null;
 
   if (!title || !isValidUrl(url)) {
     throw new Error("Título ou URL inválidos.");
   }
 
-  await supabase.from("links").update({ title, url }).eq("id", id).eq("profile_id", user.id);
+  await supabase.from("links").update({ title, url, category_id: categoryId }).eq("id", id).eq("profile_id", user.id);
 
   const { data: profile } = await supabase.from("profiles").select("username").eq("id", user.id).single();
   if (profile) revalidatePublicPage(profile.username);

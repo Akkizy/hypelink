@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "linka — sua página de links, rápida",
+  title: "hyperlink — sua página de links, rápida",
   description: "Como o Linktree, só que mais rápido, com pagamentos via Pix embutidos no plano PRO.",
 };
 

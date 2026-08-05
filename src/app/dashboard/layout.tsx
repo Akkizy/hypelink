@@ -22,6 +22,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { href: "/dashboard/design", label: "Design" },
     { href: "/dashboard/analytics", label: "Analytics" },
     { href: "/dashboard/pix", label: "Pix" },
+    { href: "/dashboard/integrations", label: "Integrações" },
     { href: "/dashboard/billing", label: "Assinatura" },
   ];
 
@@ -29,7 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="min-h-screen bg-neutral-50">
       <header className="flex items-center justify-between border-b border-black/10 bg-white px-6 py-3">
         <Link href="/" className="font-bold">
-          linka
+          hyperlink
         </Link>
         <div className="flex items-center gap-4 text-sm">
           {profile && (
@@ -39,7 +40,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               rel="noreferrer"
               className="text-black/60 hover:text-black"
             >
-              linka.app/{profile.username} ↗
+              hyperlink.app/{profile.username} ↗
             </a>
           )}
           {profile?.plan === "pro" ? (

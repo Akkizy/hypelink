@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getTheme } from "@/lib/themes";
+import { getFont } from "@/lib/fonts";
+import { groupLinksByCategory } from "@/lib/link-groups";
 import { TrackedLink } from "./tracked-link";
 import { PixBlockCard } from "./pix-block-card";
+import { YouTubeStatus } from "./youtube-status";
 
 export const revalidate = 3600;
 
@@ -13,18 +17,23 @@ async function getProfileData(username: string) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, username, display_name, bio, avatar_url, theme, plan")
+    .select("id, username, display_name, bio, avatar_url, banner_url, theme, font, plan, youtube_channel_id")
     .eq("username", username)
     .maybeSingle();
 
   if (!profile) return null;
 
-  const [{ data: links }, { data: pixBlocks }] = await Promise.all([
+  const [{ data: links }, { data: categories }, { data: pixBlocks }] = await Promise.all([
     supabase
       .from("links")
-      .select("id, title, url, position")
+      .select("id, title, url, position, category_id")
       .eq("profile_id", profile.id)
       .eq("is_active", true)
+      .order("position", { ascending: true }),
+    supabase
+      .from("link_categories")
+      .select("*")
+      .eq("profile_id", profile.id)
       .order("position", { ascending: true }),
     profile.plan === "pro"
       ? supabase
@@ -36,7 +45,7 @@ async function getProfileData(username: string) {
       : Promise.resolve({ data: [] as never[] }),
   ]);
 
-  return { profile, links: links ?? [], pixBlocks: pixBlocks ?? [] };
+  return { profile, links: links ?? [], categories: categories ?? [], pixBlocks: pixBlocks ?? [] };
 }
 
 export async function generateMetadata({
@@ -50,7 +59,7 @@ export async function generateMetadata({
 
   const title = data.profile.display_name ?? `@${data.profile.username}`;
   return {
-    title: `${title} — linka`,
+    title: `${title} — hyperlink`,
     description: data.profile.bio ?? undefined,
   };
 }
@@ -64,35 +73,69 @@ export default async function PublicProfilePage({
   const data = await getProfileData(username);
   if (!data) notFound();
 
-  const { profile, links, pixBlocks } = data;
+  const { profile, links, categories, pixBlocks } = data;
   const theme = getTheme(profile.theme);
+  const font = getFont(profile.font);
+  const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
+  const groups = groupLinksByCategory(links, categories);
 
   return (
-    <main className={`flex min-h-screen flex-col items-center px-6 py-16 ${theme.page}`}>
-      <div className="flex w-full max-w-md flex-col items-center">
-        {profile.avatar_url ? (
-          <Image
-            src={profile.avatar_url}
-            alt={profile.display_name ?? profile.username}
-            width={88}
-            height={88}
-            className="rounded-full object-cover"
-          />
-        ) : (
-          <div className={`flex h-[88px] w-[88px] items-center justify-center rounded-full text-2xl font-bold ${theme.card}`}>
-            {(profile.display_name ?? profile.username).slice(0, 1).toUpperCase()}
-          </div>
+    <main className={`min-h-screen ${theme.page} ${font.className}`}>
+      {/* Banner */}
+      <div className={`h-40 w-full sm:h-56 ${theme.bannerFallback} relative overflow-hidden`}>
+        {profile.banner_url && (
+          <Image src={profile.banner_url} alt="" fill priority className="object-cover" sizes="100vw" />
         )}
+      </div>
+
+      <div className="mx-auto flex w-full max-w-md flex-col items-center px-6 pb-16">
+        {/* Avatar overlapping the banner */}
+        <div className="relative z-10 -mt-12 sm:-mt-14">
+          {profile.avatar_url ? (
+            <Image
+              src={profile.avatar_url}
+              alt={profile.display_name ?? profile.username}
+              width={96}
+              height={96}
+              className={`h-24 w-24 rounded-full border-4 object-cover shadow-lg ${theme.avatarBorder}`}
+            />
+          ) : (
+            <div
+              className={`flex h-24 w-24 items-center justify-center rounded-full border-4 text-3xl font-bold shadow-lg ${theme.avatarBorder} ${theme.card}`}
+            >
+              {initial}
+            </div>
+          )}
+        </div>
+
         <h1 className={`mt-4 text-lg font-bold ${theme.text}`}>
           {profile.display_name ?? `@${profile.username}`}
         </h1>
-        {profile.bio && <p className={`mt-1 text-center text-sm ${theme.subtext}`}>{profile.bio}</p>}
+        {profile.display_name && <p className={`text-sm ${theme.subtext}`}>@{profile.username}</p>}
+        {profile.bio && <p className={`mt-2 text-center text-sm leading-relaxed ${theme.subtext}`}>{profile.bio}</p>}
 
-        <div className="mt-8 flex w-full flex-col gap-3">
-          {links.map((link) => (
-            <TrackedLink key={link.id} linkId={link.id} href={link.url} className={`${theme.card} ${theme.link}`}>
-              {link.title}
-            </TrackedLink>
+        {profile.plan === "pro" && profile.youtube_channel_id && (
+          <div className="mt-6 w-full">
+            <YouTubeStatus username={profile.username} theme={theme} />
+          </div>
+        )}
+
+        <div className="mt-8 flex w-full flex-col gap-5">
+          {groups.map((group) => (
+            <div key={group.key ?? "none"} className="flex w-full flex-col gap-3">
+              {group.title && (
+                <h2 className={`text-xs font-semibold uppercase tracking-wide ${theme.subtext}`}>{group.title}</h2>
+              )}
+              {group.links.map((link) => (
+                <TrackedLink
+                  key={link.id}
+                  linkId={link.id}
+                  href={link.url}
+                  title={link.title}
+                  className={`${theme.card} ${theme.link}`}
+                />
+              ))}
+            </div>
           ))}
         </div>
 
@@ -105,12 +148,9 @@ export default async function PublicProfilePage({
         )}
 
         {profile.plan !== "pro" && (
-          <a
-            href="/"
-            className={`mt-10 text-xs ${theme.subtext} opacity-70 hover:opacity-100`}
-          >
-            feito com linka
-          </a>
+          <Link href="/" className={`mt-10 text-xs font-medium ${theme.subtext} opacity-70 transition-opacity hover:opacity-100`}>
+            feito com hyperlink
+          </Link>
         )}
       </div>
     </main>

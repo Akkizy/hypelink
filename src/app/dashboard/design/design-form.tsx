@@ -3,104 +3,241 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { Theme } from "@/lib/themes";
+import type { FontOption } from "@/lib/fonts";
+import { PhoneFrame } from "@/components/phone-frame";
 import { updateProfile } from "./actions";
+import { ImageUploadField } from "./image-upload-field";
+import { removeAvatar, removeBanner, uploadAvatar, uploadBanner } from "./upload-actions";
+
+type ProfileInput = {
+  username: string;
+  display_name: string | null;
+  bio: string | null;
+  theme: string;
+  font: string;
+  plan: string;
+  avatar_url: string | null;
+  banner_url: string | null;
+};
 
 export function DesignForm({
   profile,
   themes,
+  fonts,
 }: {
-  profile: { display_name: string | null; bio: string | null; theme: string; plan: string; avatar_url: string | null };
+  profile: ProfileInput;
   themes: Theme[];
+  fonts: FontOption[];
 }) {
   const [theme, setTheme] = useState(profile.theme);
+  const [font, setFont] = useState(profile.font);
+  const [displayName, setDisplayName] = useState(profile.display_name ?? "");
+  const [bio, setBio] = useState(profile.bio ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
+  const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? "");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const isPro = profile.plan === "pro";
+  const activeTheme = themes.find((t) => t.id === theme) ?? themes[0];
+  const activeFont = fonts.find((f) => f.id === font) ?? fonts[0];
 
   return (
-    <form
-      action={(formData) => {
-        setError(null);
-        setSaved(false);
-        startTransition(async () => {
-          try {
-            await updateProfile(formData);
-            setSaved(true);
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "Erro ao salvar.");
-          }
-        });
-      }}
-      className="flex flex-col gap-6"
-    >
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">Nome de exibição</label>
-        <input
-          name="display_name"
-          defaultValue={profile.display_name ?? ""}
-          className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-black/30"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">URL da foto de perfil</label>
-        <input
-          name="avatar_url"
-          type="url"
-          placeholder="https://..."
-          defaultValue={profile.avatar_url ?? ""}
-          className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-black/30"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">Bio</label>
-        <textarea
-          name="bio"
-          defaultValue={profile.bio ?? ""}
-          rows={3}
-          className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-black/30"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">Tema</label>
-        <input type="hidden" name="theme" value={theme} />
-        <div className="grid grid-cols-3 gap-2">
-          {themes.map((t) => {
-            const locked = t.pro && !isPro;
-            return (
-              <button
-                type="button"
-                key={t.id}
-                disabled={locked}
-                onClick={() => setTheme(t.id)}
-                className={`rounded-lg p-3 text-left text-xs ${t.page} ${
-                  theme === t.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
-                } ${locked ? "cursor-not-allowed opacity-50" : ""}`}
-              >
-                <span className={t.text}>{t.label}</span>
-              </button>
-            );
-          })}
-        </div>
-        {!isPro && (
-          <p className="text-xs text-black/50">
-            Temas PRO disponíveis no{" "}
-            <Link href="/dashboard/billing" className="underline">
-              plano pago
-            </Link>
-            .
-          </p>
-        )}
-      </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {saved && <p className="text-sm text-emerald-600">Salvo!</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-fit rounded-lg bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+    <div className="grid gap-8 lg:grid-cols-[1fr_260px]">
+      <form
+        action={(formData) => {
+          setError(null);
+          setSaved(false);
+          startTransition(async () => {
+            try {
+              await updateProfile(formData);
+              setSaved(true);
+            } catch (err) {
+              setError(err instanceof Error ? err.message : "Erro ao salvar.");
+            }
+          });
+        }}
+        className="flex flex-col gap-6"
       >
-        {pending ? "Salvando…" : "Salvar"}
-      </button>
-    </form>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Nome de exibição</label>
+          <input
+            name="display_name"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-black/30"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <ImageUploadField
+            label="Foto de perfil"
+            shape="circle"
+            currentUrl={avatarUrl}
+            onChange={setAvatarUrl}
+            uploadAction={uploadAvatar}
+            removeAction={removeAvatar}
+          />
+          <ImageUploadField
+            label="Banner"
+            shape="banner"
+            currentUrl={bannerUrl}
+            onChange={setBannerUrl}
+            uploadAction={uploadBanner}
+            removeAction={removeBanner}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Bio</label>
+          <textarea
+            name="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            rows={3}
+            className="rounded-lg border border-black/10 px-3 py-2 text-sm outline-none focus:border-black/30"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Tema</label>
+          <input type="hidden" name="theme" value={theme} />
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {themes.map((t) => {
+              const locked = t.pro && !isPro;
+              return (
+                <button
+                  type="button"
+                  key={t.id}
+                  disabled={locked}
+                  onClick={() => setTheme(t.id)}
+                  className={`flex flex-col items-center gap-1.5 rounded-lg p-2 text-center text-[11px] ${
+                    theme === t.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
+                  } ${locked ? "cursor-not-allowed opacity-50" : ""}`}
+                >
+                  <span className={`h-8 w-full rounded-md ${t.swatch}`} />
+                  <span className="text-black/70">{t.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          {!isPro && (
+            <p className="text-xs text-black/50">
+              Temas PRO disponíveis no{" "}
+              <Link href="/dashboard/billing" className="underline">
+                plano pago
+              </Link>
+              .
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Fonte</label>
+          <input type="hidden" name="font" value={font} />
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {fonts.map((f) => {
+              const locked = f.pro && !isPro;
+              return (
+                <button
+                  type="button"
+                  key={f.id}
+                  disabled={locked}
+                  onClick={() => setFont(f.id)}
+                  className={`rounded-lg p-3 text-left ${
+                    font === f.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
+                  } ${locked ? "cursor-not-allowed opacity-50" : ""}`}
+                >
+                  <span className={`block text-base ${f.className}`}>Aa</span>
+                  <span className="text-[11px] text-black/60">{f.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          {!isPro && (
+            <p className="text-xs text-black/50">
+              Fontes PRO disponíveis no{" "}
+              <Link href="/dashboard/billing" className="underline">
+                plano pago
+              </Link>
+              .
+            </p>
+          )}
+        </div>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {saved && <p className="text-sm text-emerald-600">Salvo!</p>}
+        <button
+          type="submit"
+          disabled={pending}
+          className="w-fit rounded-lg bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        >
+          {pending ? "Salvando…" : "Salvar"}
+        </button>
+      </form>
+
+      <div className="lg:sticky lg:top-6 lg:self-start">
+        <p className="mb-2 text-xs font-medium text-black/50">Prévia</p>
+        <PreviewCard
+          theme={activeTheme}
+          font={activeFont}
+          displayName={displayName}
+          username={profile.username}
+          bio={bio}
+          avatarUrl={avatarUrl}
+          bannerUrl={bannerUrl}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PreviewCard({
+  theme,
+  font,
+  displayName,
+  username,
+  bio,
+  avatarUrl,
+  bannerUrl,
+}: {
+  theme: Theme;
+  font: FontOption;
+  displayName: string;
+  username: string;
+  bio: string;
+  avatarUrl: string;
+  bannerUrl: string;
+}) {
+  const initial = (displayName || username || "?").slice(0, 1).toUpperCase();
+
+  return (
+    <PhoneFrame
+      bannerClassName={theme.bannerFallback}
+      bannerContent={
+        bannerUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={bannerUrl} alt="" className="h-full w-full object-cover" />
+        ) : undefined
+      }
+    >
+      <div className={`flex min-h-full flex-col items-center px-4 pb-8 ${theme.page} ${font.className}`}>
+        <div className={`relative z-10 -mt-8 flex h-16 w-16 items-center justify-center rounded-full border-4 shadow-lg ${theme.avatarBorder}`}>
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
+          ) : (
+            <div className={`flex h-full w-full items-center justify-center rounded-full text-lg font-bold ${theme.card}`}>
+              {initial}
+            </div>
+          )}
+        </div>
+        <p className={`mt-2 text-sm font-bold ${theme.text}`}>{displayName || `@${username}`}</p>
+        {bio && <p className={`mt-1 text-center text-[11px] leading-snug ${theme.subtext}`}>{bio}</p>}
+        <div className="mt-4 flex w-full flex-col gap-1.5">
+          <div className={`flex h-9 w-full items-center justify-center rounded-lg text-[11px] font-medium ${theme.card} ${theme.link}`}>
+            seu link aqui
+          </div>
+          <div className={`flex h-9 w-full items-center justify-center rounded-lg text-[11px] font-medium ${theme.card} ${theme.link}`}>
+            outro link
+          </div>
+        </div>
+      </div>
+    </PhoneFrame>
   );
 }

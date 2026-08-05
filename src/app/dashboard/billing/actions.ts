@@ -19,7 +19,7 @@ export async function startProCheckout() {
 
   const preApproval = await getPreApprovalClient().create({
     body: {
-      reason: "linka PRO — assinatura mensal",
+      reason: "hyperlink PRO — assinatura mensal",
       external_reference: user.id,
       payer_email: user.email,
       back_url: `${siteUrl}/dashboard/billing`,

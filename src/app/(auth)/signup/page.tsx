@@ -15,7 +15,7 @@ export default function SignupPage() {
       <p className="mb-6 text-sm text-black/60">Grátis, sem cartão de crédito.</p>
       <form action={formAction} className="flex flex-col gap-4">
         <div className="flex items-center rounded-lg border border-black/10 pl-4 focus-within:border-black/30">
-          <span className="text-black/40">linka.app/</span>
+          <span className="text-black/40">hyperlink.app/</span>
           <input
             name="username"
             placeholder="seunome"

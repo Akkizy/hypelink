@@ -6,8 +6,12 @@ export type Profile = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  banner_url: string | null;
   theme: string;
+  font: string;
   plan: Plan;
+  youtube_channel_id: string | null;
+  youtube_channel_title: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -15,11 +19,21 @@ export type Profile = {
 export type Link = {
   id: string;
   profile_id: string;
+  category_id: string | null;
   title: string;
   url: string;
   position: number;
   is_active: boolean;
   click_count: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LinkCategory = {
+  id: string;
+  profile_id: string;
+  title: string;
+  position: number;
   created_at: string;
   updated_at: string;
 };
@@ -89,6 +103,12 @@ export type Database = {
         Row: Link;
         Insert: Partial<Link> & { profile_id: string; title: string; url: string };
         Update: Partial<Link>;
+        Relationships: [];
+      };
+      link_categories: {
+        Row: LinkCategory;
+        Insert: Partial<LinkCategory> & { profile_id: string; title: string };
+        Update: Partial<LinkCategory>;
         Relationships: [];
       };
       link_clicks: {

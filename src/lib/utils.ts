@@ -14,3 +14,12 @@ export function isValidUrl(url: string) {
 export function formatBRL(amount: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(amount);
 }
+
+export function last14DaysWindow() {
+  const now = Date.now();
+  const sinceIso = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString();
+  const days = Array.from({ length: 14 }, (_, i) =>
+    new Date(now - (13 - i) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+  );
+  return { sinceIso, days };
+}

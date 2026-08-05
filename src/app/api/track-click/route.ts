@@ -10,9 +10,11 @@ function detectDevice(userAgent: string | null) {
 
 export async function POST(request: NextRequest) {
   let linkId: string | undefined;
+  let entryReferrer: string | undefined;
   try {
     const body = await request.json();
     linkId = body.linkId;
+    entryReferrer = typeof body.referrer === "string" ? body.referrer : undefined;
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
@@ -33,7 +35,7 @@ export async function POST(request: NextRequest) {
     supabase.from("link_clicks").insert({
       link_id: link.id,
       profile_id: link.profile_id,
-      referrer: request.headers.get("referer"),
+      referrer: entryReferrer || null,
       device_type: detectDevice(request.headers.get("user-agent")),
       country: request.headers.get("x-vercel-ip-country"),
     }),

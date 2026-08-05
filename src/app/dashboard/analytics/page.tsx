@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { last14DaysWindow } from "@/lib/utils";
 import { ClicksChart } from "./clicks-chart";
 
 export default async function AnalyticsPage() {
@@ -25,18 +26,15 @@ export default async function AnalyticsPage() {
   let topReferrers: { referrer: string; count: number }[] = [];
 
   if (isPro) {
-    const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const { sinceIso, days } = last14DaysWindow();
     const { data: clicks } = await supabase
       .from("link_clicks")
       .select("created_at, device_type, referrer")
       .eq("profile_id", user.id)
-      .gte("created_at", since);
+      .gte("created_at", sinceIso);
 
     const byDay = new Map<string, number>();
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      byDay.set(d.toISOString().slice(0, 10), 0);
-    }
+    for (const day of days) byDay.set(day, 0);
     const byDevice = new Map<string, number>();
     const byReferrer = new Map<string, number>();
 
@@ -47,7 +45,14 @@ export default async function AnalyticsPage() {
       const device = click.device_type ?? "unknown";
       byDevice.set(device, (byDevice.get(device) ?? 0) + 1);
 
-      const referrer = click.referrer ? new URL(click.referrer).hostname : "direto";
+      let referrer = "direto";
+      if (click.referrer) {
+        try {
+          referrer = new URL(click.referrer).hostname || "direto";
+        } catch {
+          referrer = "direto";
+        }
+      }
       byReferrer.set(referrer, (byReferrer.get(referrer) ?? 0) + 1);
     }
 
