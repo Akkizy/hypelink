@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { LinkIcon } from "@/lib/link-icons";
-import { getTheme } from "@/lib/themes";
+import { getTheme, getCustomThemeVars } from "@/lib/themes";
 import { getFont } from "@/lib/fonts";
 import { getAvatarShape } from "@/lib/avatar-shapes";
+import { getAvatarSize } from "@/lib/avatar-sizes";
 import { getBannerSize } from "@/lib/banner-sizes";
 import { groupLinksByCategory } from "@/lib/link-groups";
 import { PhoneFrame } from "@/components/phone-frame";
@@ -15,11 +16,15 @@ type PreviewProfile = Pick<
   | "bio"
   | "avatar_url"
   | "avatar_shape"
+  | "avatar_size"
   | "banner_url"
   | "banner_size"
   | "banner_fade"
   | "theme"
   | "font"
+  | "custom_bg_color"
+  | "custom_card_color"
+  | "custom_text_color"
 >;
 
 export function PreviewPanel({
@@ -34,7 +39,9 @@ export function PreviewPanel({
   const theme = getTheme(profile.theme);
   const font = getFont(profile.font);
   const avatarShape = getAvatarShape(profile.avatar_shape);
+  const avatarSize = getAvatarSize(profile.avatar_size);
   const bannerSize = getBannerSize(profile.banner_size);
+  const customVars = getCustomThemeVars(profile.theme, profile);
   const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
   const activeLinks = links.filter((l) => l.is_active);
   const groups = groupLinksByCategory(activeLinks, categories);
@@ -63,9 +70,9 @@ export function PreviewPanel({
           ) : undefined
         }
       >
-        <div className={`flex min-h-full flex-col items-center px-4 pb-8 ${theme.page} ${font.className}`}>
+        <div style={customVars} className={`flex min-h-full flex-col items-center px-4 pb-8 ${theme.page} ${font.className}`}>
           <div
-            className={`relative z-10 -mt-8 flex h-16 w-16 items-center justify-center border-4 shadow-lg ${theme.avatarBorder} ${avatarShape.className}`}
+            className={`relative z-10 -mt-8 flex items-center justify-center border-4 shadow-lg ${theme.avatarBorder} ${avatarShape.className} ${avatarSize.previewClass}`}
           >
             {profile.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element

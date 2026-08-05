@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 export type Theme = {
   id: string;
   label: string;
@@ -168,8 +170,37 @@ export const THEMES: Theme[] = [
     bannerFadeTo: "to-pink-100",
     swatch: "bg-gradient-to-br from-pink-300 via-fuchsia-300 to-yellow-200",
   },
+  {
+    id: "custom",
+    label: "Personalizado (PRO)",
+    pro: true,
+    page: "bg-[var(--lk-bg)]",
+    card: "bg-[var(--lk-card)] hover:opacity-90 text-[var(--lk-text)] shadow-sm",
+    text: "text-[var(--lk-text)]",
+    subtext: "text-[var(--lk-text)] opacity-60",
+    link: "",
+    avatarBorder: "border-[var(--lk-bg)]",
+    bannerFallback: "bg-[var(--lk-card)]",
+    bannerFadeTo: "to-[var(--lk-bg)]",
+    swatch: "bg-gradient-to-br from-pink-400 via-yellow-400 to-sky-400",
+  },
 ];
 
 export function getTheme(id: string): Theme {
   return THEMES.find((t) => t.id === id) ?? THEMES[0];
+}
+
+export type CustomColors = {
+  custom_bg_color: string;
+  custom_card_color: string;
+  custom_text_color: string;
+};
+
+export function getCustomThemeVars(themeId: string, colors: CustomColors): CSSProperties | undefined {
+  if (themeId !== "custom") return undefined;
+  return {
+    "--lk-bg": colors.custom_bg_color,
+    "--lk-card": colors.custom_card_color,
+    "--lk-text": colors.custom_text_color,
+  } as CSSProperties;
 }

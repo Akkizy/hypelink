@@ -3,8 +3,10 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { Theme } from "@/lib/themes";
+import { getCustomThemeVars } from "@/lib/themes";
 import type { FontOption } from "@/lib/fonts";
 import type { AvatarShape } from "@/lib/avatar-shapes";
+import type { AvatarSize } from "@/lib/avatar-sizes";
 import type { BannerSize } from "@/lib/banner-sizes";
 import { PhoneFrame } from "@/components/phone-frame";
 import { updateProfile } from "./actions";
@@ -20,9 +22,13 @@ type ProfileInput = {
   plan: string;
   avatar_url: string | null;
   avatar_shape: string;
+  avatar_size: string;
   banner_url: string | null;
   banner_size: string;
   banner_fade: boolean;
+  custom_bg_color: string;
+  custom_card_color: string;
+  custom_text_color: string;
 };
 
 export function DesignForm({
@@ -30,19 +36,25 @@ export function DesignForm({
   themes,
   fonts,
   avatarShapes,
+  avatarSizes,
   bannerSizes,
 }: {
   profile: ProfileInput;
   themes: Theme[];
   fonts: FontOption[];
   avatarShapes: AvatarShape[];
+  avatarSizes: AvatarSize[];
   bannerSizes: BannerSize[];
 }) {
   const [theme, setTheme] = useState(profile.theme);
   const [font, setFont] = useState(profile.font);
   const [avatarShape, setAvatarShape] = useState(profile.avatar_shape);
+  const [avatarSize, setAvatarSize] = useState(profile.avatar_size);
   const [bannerSize, setBannerSize] = useState(profile.banner_size);
   const [bannerFade, setBannerFade] = useState(profile.banner_fade);
+  const [customBg, setCustomBg] = useState(profile.custom_bg_color);
+  const [customCard, setCustomCard] = useState(profile.custom_card_color);
+  const [customText, setCustomText] = useState(profile.custom_text_color);
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [bio, setBio] = useState(profile.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
@@ -54,6 +66,7 @@ export function DesignForm({
   const activeTheme = themes.find((t) => t.id === theme) ?? themes[0];
   const activeFont = fonts.find((f) => f.id === font) ?? fonts[0];
   const activeShape = avatarShapes.find((s) => s.id === avatarShape) ?? avatarShapes[0];
+  const activeAvatarSize = avatarSizes.find((s) => s.id === avatarSize) ?? avatarSizes[0];
   const activeBannerSize = bannerSizes.find((s) => s.id === bannerSize) ?? bannerSizes[0];
 
   return (
@@ -119,6 +132,39 @@ export function DesignForm({
               </button>
             ))}
           </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Tamanho da foto de perfil</label>
+          <input type="hidden" name="avatar_size" value={avatarSize} />
+          <div className="flex items-end gap-2">
+            {avatarSizes.map((s) => {
+              const locked = s.id !== "medium" && !isPro;
+              const dim = s.id === "small" ? "h-6 w-6" : s.id === "large" ? "h-10 w-10" : "h-8 w-8";
+              return (
+                <button
+                  type="button"
+                  key={s.id}
+                  disabled={locked}
+                  onClick={() => setAvatarSize(s.id)}
+                  className={`flex flex-col items-center gap-1.5 rounded-lg p-2 ${
+                    avatarSize === s.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
+                  } ${locked ? "cursor-not-allowed opacity-50" : ""}`}
+                >
+                  <span className={`block rounded-full bg-neutral-300 ${dim}`} />
+                  <span className="text-[11px] text-black/70">{s.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          {!isPro && (
+            <p className="text-xs text-black/50">
+              Tamanhos Pequeno/Grande disponíveis no{" "}
+              <Link href="/dashboard/billing" className="underline">
+                plano pago
+              </Link>
+              .
+            </p>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Tamanho do banner</label>
@@ -188,6 +234,40 @@ export function DesignForm({
               .
             </p>
           )}
+          {theme === "custom" && isPro && (
+            <div className="mt-2 flex flex-wrap gap-4 rounded-lg border border-black/10 p-3">
+              <label className="flex flex-col gap-1 text-xs text-black/60">
+                Fundo
+                <input
+                  type="color"
+                  name="custom_bg_color"
+                  value={customBg}
+                  onChange={(e) => setCustomBg(e.target.value)}
+                  className="h-8 w-14 cursor-pointer rounded border border-black/10"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-black/60">
+                Cartões / banner
+                <input
+                  type="color"
+                  name="custom_card_color"
+                  value={customCard}
+                  onChange={(e) => setCustomCard(e.target.value)}
+                  className="h-8 w-14 cursor-pointer rounded border border-black/10"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-black/60">
+                Texto
+                <input
+                  type="color"
+                  name="custom_text_color"
+                  value={customText}
+                  onChange={(e) => setCustomText(e.target.value)}
+                  className="h-8 w-14 cursor-pointer rounded border border-black/10"
+                />
+              </label>
+            </div>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Fonte</label>
@@ -238,8 +318,14 @@ export function DesignForm({
           theme={activeTheme}
           font={activeFont}
           avatarShape={activeShape}
+          avatarSize={activeAvatarSize}
           bannerSize={activeBannerSize}
           bannerFade={bannerFade}
+          customVars={getCustomThemeVars(theme, {
+            custom_bg_color: customBg,
+            custom_card_color: customCard,
+            custom_text_color: customText,
+          })}
           displayName={displayName}
           username={profile.username}
           bio={bio}
@@ -255,8 +341,10 @@ function PreviewCard({
   theme,
   font,
   avatarShape,
+  avatarSize,
   bannerSize,
   bannerFade,
+  customVars,
   displayName,
   username,
   bio,
@@ -266,8 +354,10 @@ function PreviewCard({
   theme: Theme;
   font: FontOption;
   avatarShape: AvatarShape;
+  avatarSize: AvatarSize;
   bannerSize: BannerSize;
   bannerFade: boolean;
+  customVars: React.CSSProperties | undefined;
   displayName: string;
   username: string;
   bio: string;
@@ -288,9 +378,12 @@ function PreviewCard({
         ) : undefined
       }
     >
-      <div className={`flex min-h-full flex-col items-center px-4 pb-8 ${theme.page} ${font.className}`}>
+      <div
+        style={customVars}
+        className={`flex min-h-full flex-col items-center px-4 pb-8 ${theme.page} ${font.className}`}
+      >
         <div
-          className={`relative z-10 -mt-8 flex h-16 w-16 items-center justify-center border-4 shadow-lg ${theme.avatarBorder} ${avatarShape.className}`}
+          className={`relative z-10 -mt-8 flex items-center justify-center border-4 shadow-lg ${theme.avatarBorder} ${avatarShape.className} ${avatarSize.previewClass}`}
         >
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element

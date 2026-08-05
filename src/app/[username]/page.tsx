@@ -3,9 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { createPublicClient } from "@/lib/supabase/public";
-import { getTheme } from "@/lib/themes";
+import { getTheme, getCustomThemeVars } from "@/lib/themes";
 import { getFont } from "@/lib/fonts";
 import { getAvatarShape } from "@/lib/avatar-shapes";
+import { getAvatarSize } from "@/lib/avatar-sizes";
 import { getBannerSize } from "@/lib/banner-sizes";
 import { groupLinksByCategory } from "@/lib/link-groups";
 import { TrackedLink } from "./tracked-link";
@@ -20,7 +21,7 @@ async function getProfileData(username: string) {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, display_name, bio, avatar_url, avatar_shape, banner_url, banner_size, banner_fade, theme, font, plan, youtube_channel_id",
+      "id, username, display_name, bio, avatar_url, avatar_shape, avatar_size, banner_url, banner_size, banner_fade, theme, font, plan, youtube_channel_id, custom_bg_color, custom_card_color, custom_text_color",
     )
     .eq("username", username)
     .maybeSingle();
@@ -81,12 +82,14 @@ export default async function PublicProfilePage({
   const theme = getTheme(profile.theme);
   const font = getFont(profile.font);
   const avatarShape = getAvatarShape(profile.avatar_shape);
+  const avatarSize = getAvatarSize(profile.avatar_size);
   const bannerSize = getBannerSize(profile.banner_size);
+  const customVars = getCustomThemeVars(profile.theme, profile);
   const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
   const groups = groupLinksByCategory(links, categories);
 
   return (
-    <main className={`min-h-screen ${theme.page} ${font.className}`}>
+    <main style={customVars} className={`min-h-screen ${theme.page} ${font.className}`}>
       {/* Banner */}
       <div className={`${bannerSize.publicClass} w-full ${theme.bannerFallback} relative overflow-hidden`}>
         {profile.banner_url && (
@@ -99,18 +102,20 @@ export default async function PublicProfilePage({
 
       <div className="mx-auto flex w-full max-w-md flex-col items-center px-6 pb-16">
         {/* Avatar overlapping the banner */}
-        <div className="relative z-10 -mt-12 sm:-mt-14">
+        <div
+          className={`relative z-10 -mt-12 border-4 shadow-lg sm:-mt-14 ${theme.avatarBorder} ${avatarShape.className} ${avatarSize.publicClass}`}
+        >
           {profile.avatar_url ? (
             <Image
               src={profile.avatar_url}
               alt={profile.display_name ?? profile.username}
-              width={96}
-              height={96}
-              className={`h-24 w-24 border-4 object-cover shadow-lg ${theme.avatarBorder} ${avatarShape.className}`}
+              fill
+              sizes="128px"
+              className={`object-cover ${avatarShape.className}`}
             />
           ) : (
             <div
-              className={`flex h-24 w-24 items-center justify-center border-4 text-3xl font-bold shadow-lg ${theme.avatarBorder} ${theme.card} ${avatarShape.className}`}
+              className={`flex h-full w-full items-center justify-center text-3xl font-bold ${theme.card} ${avatarShape.className}`}
             >
               {initial}
             </div>

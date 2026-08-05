@@ -7,11 +7,15 @@ export type Profile = {
   bio: string | null;
   avatar_url: string | null;
   avatar_shape: string;
+  avatar_size: string;
   banner_url: string | null;
   banner_size: string;
   banner_fade: boolean;
   theme: string;
   font: string;
+  custom_bg_color: string;
+  custom_card_color: string;
+  custom_text_color: string;
   plan: Plan;
   youtube_channel_id: string | null;
   youtube_channel_title: string | null;
