@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { THEMES } from "@/lib/themes";
 import { FONTS } from "@/lib/fonts";
+import { AVATAR_SHAPES } from "@/lib/avatar-shapes";
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
@@ -19,6 +20,7 @@ export async function updateProfile(formData: FormData) {
   const bio = String(formData.get("bio") ?? "").trim();
   const theme = String(formData.get("theme") ?? "default");
   const font = String(formData.get("font") ?? "sans");
+  const avatarShape = String(formData.get("avatar_shape") ?? "circle");
 
   const selectedTheme = THEMES.find((t) => t.id === theme);
   if (!selectedTheme || (selectedTheme.pro && profile.plan !== "pro")) {
@@ -30,6 +32,10 @@ export async function updateProfile(formData: FormData) {
     throw new Error("Fonte disponível apenas no plano PRO.");
   }
 
+  if (!AVATAR_SHAPES.some((s) => s.id === avatarShape)) {
+    throw new Error("Formato de avatar inválido.");
+  }
+
   await supabase
     .from("profiles")
     .update({
@@ -37,6 +43,7 @@ export async function updateProfile(formData: FormData) {
       bio: bio || null,
       theme,
       font,
+      avatar_shape: avatarShape,
     })
     .eq("id", user.id);
 

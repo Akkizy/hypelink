@@ -2,13 +2,14 @@ import Link from "next/link";
 import { LinkIcon } from "@/lib/link-icons";
 import { getTheme } from "@/lib/themes";
 import { getFont } from "@/lib/fonts";
+import { getAvatarShape } from "@/lib/avatar-shapes";
 import { groupLinksByCategory } from "@/lib/link-groups";
 import { PhoneFrame } from "@/components/phone-frame";
 import type { Link as LinkRow, LinkCategory, Profile } from "@/lib/supabase/types";
 
 type PreviewProfile = Pick<
   Profile,
-  "username" | "display_name" | "bio" | "avatar_url" | "banner_url" | "theme" | "font"
+  "username" | "display_name" | "bio" | "avatar_url" | "avatar_shape" | "banner_url" | "theme" | "font"
 >;
 
 export function PreviewPanel({
@@ -22,6 +23,7 @@ export function PreviewPanel({
 }) {
   const theme = getTheme(profile.theme);
   const font = getFont(profile.font);
+  const avatarShape = getAvatarShape(profile.avatar_shape);
   const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
   const activeLinks = links.filter((l) => l.is_active);
   const groups = groupLinksByCategory(activeLinks, categories);
@@ -49,12 +51,14 @@ export function PreviewPanel({
         }
       >
         <div className={`flex min-h-full flex-col items-center px-4 pb-8 ${theme.page} ${font.className}`}>
-          <div className={`relative z-10 -mt-8 flex h-16 w-16 items-center justify-center rounded-full border-4 shadow-lg ${theme.avatarBorder}`}>
+          <div
+            className={`relative z-10 -mt-8 flex h-16 w-16 items-center justify-center border-4 shadow-lg ${theme.avatarBorder} ${avatarShape.className}`}
+          >
             {profile.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.avatar_url} alt="" className="h-full w-full rounded-full object-cover" />
+              <img src={profile.avatar_url} alt="" className={`h-full w-full object-cover ${avatarShape.className}`} />
             ) : (
-              <div className={`flex h-full w-full items-center justify-center rounded-full text-lg font-bold ${theme.card}`}>
+              <div className={`flex h-full w-full items-center justify-center text-lg font-bold ${theme.card} ${avatarShape.className}`}>
                 {initial}
               </div>
             )}

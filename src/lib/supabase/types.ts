@@ -6,6 +6,7 @@ export type Profile = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  avatar_shape: string;
   banner_url: string | null;
   theme: string;
   font: string;

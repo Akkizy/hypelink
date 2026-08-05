@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { createPublicClient } from "@/lib/supabase/public";
 import { getTheme } from "@/lib/themes";
 import { getFont } from "@/lib/fonts";
+import { getAvatarShape } from "@/lib/avatar-shapes";
 import { groupLinksByCategory } from "@/lib/link-groups";
 import { TrackedLink } from "./tracked-link";
 import { PixBlockCard } from "./pix-block-card";
@@ -17,7 +18,9 @@ async function getProfileData(username: string) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, username, display_name, bio, avatar_url, banner_url, theme, font, plan, youtube_channel_id")
+    .select(
+      "id, username, display_name, bio, avatar_url, avatar_shape, banner_url, theme, font, plan, youtube_channel_id",
+    )
     .eq("username", username)
     .maybeSingle();
 
@@ -76,6 +79,7 @@ export default async function PublicProfilePage({
   const { profile, links, categories, pixBlocks } = data;
   const theme = getTheme(profile.theme);
   const font = getFont(profile.font);
+  const avatarShape = getAvatarShape(profile.avatar_shape);
   const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
   const groups = groupLinksByCategory(links, categories);
 
@@ -97,11 +101,11 @@ export default async function PublicProfilePage({
               alt={profile.display_name ?? profile.username}
               width={96}
               height={96}
-              className={`h-24 w-24 rounded-full border-4 object-cover shadow-lg ${theme.avatarBorder}`}
+              className={`h-24 w-24 border-4 object-cover shadow-lg ${theme.avatarBorder} ${avatarShape.className}`}
             />
           ) : (
             <div
-              className={`flex h-24 w-24 items-center justify-center rounded-full border-4 text-3xl font-bold shadow-lg ${theme.avatarBorder} ${theme.card}`}
+              className={`flex h-24 w-24 items-center justify-center border-4 text-3xl font-bold shadow-lg ${theme.avatarBorder} ${theme.card} ${avatarShape.className}`}
             >
               {initial}
             </div>

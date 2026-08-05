@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { Theme } from "@/lib/themes";
 import type { FontOption } from "@/lib/fonts";
+import type { AvatarShape } from "@/lib/avatar-shapes";
 import { PhoneFrame } from "@/components/phone-frame";
 import { updateProfile } from "./actions";
 import { ImageUploadField } from "./image-upload-field";
@@ -17,6 +18,7 @@ type ProfileInput = {
   font: string;
   plan: string;
   avatar_url: string | null;
+  avatar_shape: string;
   banner_url: string | null;
 };
 
@@ -24,13 +26,16 @@ export function DesignForm({
   profile,
   themes,
   fonts,
+  avatarShapes,
 }: {
   profile: ProfileInput;
   themes: Theme[];
   fonts: FontOption[];
+  avatarShapes: AvatarShape[];
 }) {
   const [theme, setTheme] = useState(profile.theme);
   const [font, setFont] = useState(profile.font);
+  const [avatarShape, setAvatarShape] = useState(profile.avatar_shape);
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [bio, setBio] = useState(profile.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
@@ -41,6 +46,7 @@ export function DesignForm({
   const isPro = profile.plan === "pro";
   const activeTheme = themes.find((t) => t.id === theme) ?? themes[0];
   const activeFont = fonts.find((f) => f.id === font) ?? fonts[0];
+  const activeShape = avatarShapes.find((s) => s.id === avatarShape) ?? avatarShapes[0];
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_260px]">
@@ -72,6 +78,7 @@ export function DesignForm({
           <ImageUploadField
             label="Foto de perfil"
             shape="circle"
+            previewClassName={activeShape.className}
             currentUrl={avatarUrl}
             onChange={setAvatarUrl}
             uploadAction={uploadAvatar}
@@ -85,6 +92,25 @@ export function DesignForm({
             uploadAction={uploadBanner}
             removeAction={removeBanner}
           />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Formato da foto de perfil</label>
+          <input type="hidden" name="avatar_shape" value={avatarShape} />
+          <div className="flex gap-2">
+            {avatarShapes.map((s) => (
+              <button
+                type="button"
+                key={s.id}
+                onClick={() => setAvatarShape(s.id)}
+                className={`flex flex-col items-center gap-1.5 rounded-lg p-2 ${
+                  avatarShape === s.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
+                }`}
+              >
+                <span className={`block h-8 w-8 bg-neutral-300 ${s.className}`} />
+                <span className="text-[11px] text-black/70">{s.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Bio</label>
@@ -176,6 +202,7 @@ export function DesignForm({
         <PreviewCard
           theme={activeTheme}
           font={activeFont}
+          avatarShape={activeShape}
           displayName={displayName}
           username={profile.username}
           bio={bio}
@@ -190,6 +217,7 @@ export function DesignForm({
 function PreviewCard({
   theme,
   font,
+  avatarShape,
   displayName,
   username,
   bio,
@@ -198,6 +226,7 @@ function PreviewCard({
 }: {
   theme: Theme;
   font: FontOption;
+  avatarShape: AvatarShape;
   displayName: string;
   username: string;
   bio: string;
@@ -217,12 +246,14 @@ function PreviewCard({
       }
     >
       <div className={`flex min-h-full flex-col items-center px-4 pb-8 ${theme.page} ${font.className}`}>
-        <div className={`relative z-10 -mt-8 flex h-16 w-16 items-center justify-center rounded-full border-4 shadow-lg ${theme.avatarBorder}`}>
+        <div
+          className={`relative z-10 -mt-8 flex h-16 w-16 items-center justify-center border-4 shadow-lg ${theme.avatarBorder} ${avatarShape.className}`}
+        >
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt="" className="h-full w-full rounded-full object-cover" />
+            <img src={avatarUrl} alt="" className={`h-full w-full object-cover ${avatarShape.className}`} />
           ) : (
-            <div className={`flex h-full w-full items-center justify-center rounded-full text-lg font-bold ${theme.card}`}>
+            <div className={`flex h-full w-full items-center justify-center text-lg font-bold ${theme.card} ${avatarShape.className}`}>
               {initial}
             </div>
           )}

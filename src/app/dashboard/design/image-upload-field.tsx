@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 export function ImageUploadField({
   label,
   shape,
+  previewClassName,
   currentUrl,
   onChange,
   uploadAction,
@@ -12,6 +13,7 @@ export function ImageUploadField({
 }: {
   label: string;
   shape: "circle" | "banner";
+  previewClassName?: string;
   currentUrl: string;
   onChange: (url: string) => void;
   uploadAction: (formData: FormData) => Promise<string>;
@@ -22,12 +24,9 @@ export function ImageUploadField({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const previewClass =
-    shape === "circle" ? "h-14 w-14 rounded-full object-cover" : "h-12 w-24 rounded-lg object-cover";
-  const placeholderClass =
-    shape === "circle"
-      ? "h-14 w-14 rounded-full bg-neutral-100"
-      : "h-12 w-24 rounded-lg bg-neutral-100";
+  const shapeClass = shape === "circle" ? (previewClassName ?? "rounded-full") : "rounded-lg";
+  const previewClass = shape === "circle" ? `h-14 w-14 object-cover ${shapeClass}` : `h-12 w-24 object-cover ${shapeClass}`;
+  const placeholderClass = shape === "circle" ? `h-14 w-14 bg-neutral-100 ${shapeClass}` : `h-12 w-24 bg-neutral-100 ${shapeClass}`;
 
   async function handleFile(file: File) {
     setError(null);
@@ -96,7 +95,7 @@ export function ImageUploadField({
         }}
       />
       {error && <p className="text-xs text-red-600">{error}</p>}
-      <p className="text-[11px] text-black/40">PNG, JPG, WEBP ou GIF — até 5MB.</p>
+      <p className="text-[11px] text-black/40">PNG, JPG, WEBP ou GIF — até 10MB.</p>
     </div>
   );
 }
