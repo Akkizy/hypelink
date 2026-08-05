@@ -8,6 +8,7 @@ import type { FontOption } from "@/lib/fonts";
 import type { AvatarShape } from "@/lib/avatar-shapes";
 import type { AvatarSize } from "@/lib/avatar-sizes";
 import type { BannerSize } from "@/lib/banner-sizes";
+import type { LayoutStyle } from "@/lib/layout-styles";
 import { PhoneFrame } from "@/components/phone-frame";
 import { updateProfile } from "./actions";
 import { ImageUploadField } from "./image-upload-field";
@@ -29,6 +30,7 @@ type ProfileInput = {
   custom_bg_color: string;
   custom_card_color: string;
   custom_text_color: string;
+  layout_style: string;
 };
 
 export function DesignForm({
@@ -38,6 +40,7 @@ export function DesignForm({
   avatarShapes,
   avatarSizes,
   bannerSizes,
+  layoutStyles,
 }: {
   profile: ProfileInput;
   themes: Theme[];
@@ -45,6 +48,7 @@ export function DesignForm({
   avatarShapes: AvatarShape[];
   avatarSizes: AvatarSize[];
   bannerSizes: BannerSize[];
+  layoutStyles: LayoutStyle[];
 }) {
   const [theme, setTheme] = useState(profile.theme);
   const [font, setFont] = useState(profile.font);
@@ -52,6 +56,7 @@ export function DesignForm({
   const [avatarSize, setAvatarSize] = useState(profile.avatar_size);
   const [bannerSize, setBannerSize] = useState(profile.banner_size);
   const [bannerFade, setBannerFade] = useState(profile.banner_fade);
+  const [layoutStyle, setLayoutStyle] = useState(profile.layout_style);
   const [customBg, setCustomBg] = useState(profile.custom_bg_color);
   const [customCard, setCustomCard] = useState(profile.custom_card_color);
   const [customText, setCustomText] = useState(profile.custom_text_color);
@@ -68,6 +73,7 @@ export function DesignForm({
   const activeShape = avatarShapes.find((s) => s.id === avatarShape) ?? avatarShapes[0];
   const activeAvatarSize = avatarSizes.find((s) => s.id === avatarSize) ?? avatarSizes[0];
   const activeBannerSize = bannerSizes.find((s) => s.id === bannerSize) ?? bannerSizes[0];
+  const isPoster = layoutStyle === "poster" && isPro;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_260px]">
@@ -86,6 +92,43 @@ export function DesignForm({
         }}
         className="flex flex-col gap-6"
       >
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Estilo do layout</label>
+          <input type="hidden" name="layout_style" value={layoutStyle} />
+          <div className="flex gap-2">
+            {layoutStyles.map((l) => {
+              const locked = l.pro && !isPro;
+              return (
+                <button
+                  type="button"
+                  key={l.id}
+                  disabled={locked}
+                  onClick={() => setLayoutStyle(l.id)}
+                  className={`rounded-lg px-3 py-2 text-sm ${
+                    layoutStyle === l.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
+                  } ${locked ? "cursor-not-allowed opacity-50" : ""}`}
+                >
+                  {l.label}
+                </button>
+              );
+            })}
+          </div>
+          {!isPro && (
+            <p className="text-xs text-black/50">
+              Estilo Pôster (foto grande + fundo desfocado) disponível no{" "}
+              <Link href="/dashboard/billing" className="underline">
+                plano pago
+              </Link>
+              .
+            </p>
+          )}
+          {isPoster && (
+            <p className="text-xs text-black/50">
+              No estilo Pôster, sua foto de perfil vira a imagem de capa — formato, tamanho e banner abaixo ficam
+              sem efeito.
+            </p>
+          )}
+        </div>
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Nome de exibição</label>
           <input
@@ -114,85 +157,94 @@ export function DesignForm({
             removeAction={removeBanner}
           />
         </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">Formato da foto de perfil</label>
-          <input type="hidden" name="avatar_shape" value={avatarShape} />
-          <div className="flex gap-2">
-            {avatarShapes.map((s) => (
-              <button
-                type="button"
-                key={s.id}
-                onClick={() => setAvatarShape(s.id)}
-                className={`flex flex-col items-center gap-1.5 rounded-lg p-2 ${
-                  avatarShape === s.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
-                }`}
-              >
-                <span className={`block h-8 w-8 bg-neutral-300 ${s.className}`} />
-                <span className="text-[11px] text-black/70">{s.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">Tamanho da foto de perfil</label>
-          <input type="hidden" name="avatar_size" value={avatarSize} />
-          <div className="flex items-end gap-2">
-            {avatarSizes.map((s) => {
-              const locked = s.id !== "medium" && !isPro;
-              const dim = s.id === "small" ? "h-6 w-6" : s.id === "large" ? "h-10 w-10" : "h-8 w-8";
-              return (
-                <button
-                  type="button"
-                  key={s.id}
-                  disabled={locked}
-                  onClick={() => setAvatarSize(s.id)}
-                  className={`flex flex-col items-center gap-1.5 rounded-lg p-2 ${
-                    avatarSize === s.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
-                  } ${locked ? "cursor-not-allowed opacity-50" : ""}`}
-                >
-                  <span className={`block rounded-full bg-neutral-300 ${dim}`} />
-                  <span className="text-[11px] text-black/70">{s.label}</span>
-                </button>
-              );
-            })}
-          </div>
-          {!isPro && (
-            <p className="text-xs text-black/50">
-              Tamanhos Pequeno/Grande disponíveis no{" "}
-              <Link href="/dashboard/billing" className="underline">
-                plano pago
-              </Link>
-              .
-            </p>
-          )}
-        </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">Tamanho do banner</label>
-          <input type="hidden" name="banner_size" value={bannerSize} />
-          <div className="flex gap-2">
-            {bannerSizes.map((s) => (
-              <button
-                type="button"
-                key={s.id}
-                onClick={() => setBannerSize(s.id)}
-                className={`flex flex-col items-center gap-1.5 rounded-lg p-2 ${
-                  bannerSize === s.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
-                }`}
-              >
-                <span
-                  className={`block w-14 rounded-md bg-neutral-300 ${
-                    s.id === "short" ? "h-4" : s.id === "tall" ? "h-8" : "h-6"
-                  }`}
+        {!isPoster && (
+          <>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Formato da foto de perfil</label>
+              <input type="hidden" name="avatar_shape" value={avatarShape} />
+              <div className="flex gap-2">
+                {avatarShapes.map((s) => (
+                  <button
+                    type="button"
+                    key={s.id}
+                    onClick={() => setAvatarShape(s.id)}
+                    className={`flex flex-col items-center gap-1.5 rounded-lg p-2 ${
+                      avatarShape === s.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
+                    }`}
+                  >
+                    <span className={`block h-8 w-8 bg-neutral-300 ${s.className}`} />
+                    <span className="text-[11px] text-black/70">{s.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Tamanho da foto de perfil</label>
+              <input type="hidden" name="avatar_size" value={avatarSize} />
+              <div className="flex items-end gap-2">
+                {avatarSizes.map((s) => {
+                  const locked = s.id !== "medium" && !isPro;
+                  const dim = s.id === "small" ? "h-6 w-6" : s.id === "large" ? "h-10 w-10" : "h-8 w-8";
+                  return (
+                    <button
+                      type="button"
+                      key={s.id}
+                      disabled={locked}
+                      onClick={() => setAvatarSize(s.id)}
+                      className={`flex flex-col items-center gap-1.5 rounded-lg p-2 ${
+                        avatarSize === s.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
+                      } ${locked ? "cursor-not-allowed opacity-50" : ""}`}
+                    >
+                      <span className={`block rounded-full bg-neutral-300 ${dim}`} />
+                      <span className="text-[11px] text-black/70">{s.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {!isPro && (
+                <p className="text-xs text-black/50">
+                  Tamanhos Pequeno/Grande disponíveis no{" "}
+                  <Link href="/dashboard/billing" className="underline">
+                    plano pago
+                  </Link>
+                  .
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Tamanho do banner</label>
+              <input type="hidden" name="banner_size" value={bannerSize} />
+              <div className="flex gap-2">
+                {bannerSizes.map((s) => (
+                  <button
+                    type="button"
+                    key={s.id}
+                    onClick={() => setBannerSize(s.id)}
+                    className={`flex flex-col items-center gap-1.5 rounded-lg p-2 ${
+                      bannerSize === s.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
+                    }`}
+                  >
+                    <span
+                      className={`block w-14 rounded-md bg-neutral-300 ${
+                        s.id === "short" ? "h-4" : s.id === "tall" ? "h-8" : "h-6"
+                      }`}
+                    />
+                    <span className="text-[11px] text-black/70">{s.label}</span>
+                  </button>
+                ))}
+              </div>
+              <label className="mt-1 flex items-center gap-2 text-sm text-black/70">
+                <input
+                  type="checkbox"
+                  name="banner_fade"
+                  defaultChecked={bannerFade}
+                  onChange={(e) => setBannerFade(e.target.checked)}
                 />
-                <span className="text-[11px] text-black/70">{s.label}</span>
-              </button>
-            ))}
-          </div>
-          <label className="mt-1 flex items-center gap-2 text-sm text-black/70">
-            <input type="checkbox" name="banner_fade" defaultChecked={bannerFade} onChange={(e) => setBannerFade(e.target.checked)} />
-            Esmaecer o banner até a cor do tema
-          </label>
-        </div>
+                Esmaecer o banner até a cor do tema
+              </label>
+            </div>
+          </>
+        )}
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Bio</label>
           <textarea
@@ -314,24 +366,28 @@ export function DesignForm({
 
       <div className="lg:sticky lg:top-6 lg:self-start">
         <p className="mb-2 text-xs font-medium text-black/50">Prévia</p>
-        <PreviewCard
-          theme={activeTheme}
-          font={activeFont}
-          avatarShape={activeShape}
-          avatarSize={activeAvatarSize}
-          bannerSize={activeBannerSize}
-          bannerFade={bannerFade}
-          customVars={getCustomThemeVars(theme, {
-            custom_bg_color: customBg,
-            custom_card_color: customCard,
-            custom_text_color: customText,
-          })}
-          displayName={displayName}
-          username={profile.username}
-          bio={bio}
-          avatarUrl={avatarUrl}
-          bannerUrl={bannerUrl}
-        />
+        {isPoster ? (
+          <PosterPreviewCard font={activeFont} displayName={displayName} username={profile.username} bio={bio} avatarUrl={avatarUrl} />
+        ) : (
+          <PreviewCard
+            theme={activeTheme}
+            font={activeFont}
+            avatarShape={activeShape}
+            avatarSize={activeAvatarSize}
+            bannerSize={activeBannerSize}
+            bannerFade={bannerFade}
+            customVars={getCustomThemeVars(theme, {
+              custom_bg_color: customBg,
+              custom_card_color: customCard,
+              custom_text_color: customText,
+            })}
+            displayName={displayName}
+            username={profile.username}
+            bio={bio}
+            avatarUrl={avatarUrl}
+            bannerUrl={bannerUrl}
+          />
+        )}
       </div>
     </div>
   );
@@ -401,6 +457,59 @@ function PreviewCard({
             seu link aqui
           </div>
           <div className={`flex h-9 w-full items-center justify-center rounded-lg text-[11px] font-medium ${theme.card} ${theme.link}`}>
+            outro link
+          </div>
+        </div>
+      </div>
+    </PhoneFrame>
+  );
+}
+
+function PosterPreviewCard({
+  font,
+  displayName,
+  username,
+  bio,
+  avatarUrl,
+}: {
+  font: FontOption;
+  displayName: string;
+  username: string;
+  bio: string;
+  avatarUrl: string;
+}) {
+  const initial = (displayName || username || "?").slice(0, 1).toUpperCase();
+
+  return (
+    <PhoneFrame bannerClassName="bg-neutral-950" bannerHeightClass="h-0">
+      <div className={`relative flex min-h-full flex-col items-center bg-neutral-950 px-4 pb-8 pt-4 ${font.className}`}>
+        {avatarUrl && (
+          <div className="pointer-events-none absolute inset-0" aria-hidden>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={avatarUrl} alt="" className="h-full w-full scale-125 object-cover opacity-60 blur-2xl" />
+            <div className="absolute inset-0 bg-black/50" />
+          </div>
+        )}
+        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl shadow-xl">
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-3xl font-bold text-white">
+              {initial}
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          <div className="absolute inset-x-0 bottom-3 px-3">
+            <p className="text-sm font-extrabold text-white drop-shadow-md">{displayName || `@${username}`}</p>
+          </div>
+        </div>
+        {bio && <p className="relative mt-3 text-center text-[11px] leading-snug text-white/80">{bio}</p>}
+        <div className="relative mt-4 flex w-full flex-col gap-1.5">
+          <div className="flex h-9 w-full items-center justify-center rounded-lg bg-white/90 text-[11px] font-medium text-neutral-900">
+            seu link aqui
+          </div>
+          <div className="flex h-9 w-full items-center justify-center rounded-lg bg-white/90 text-[11px] font-medium text-neutral-900">
             outro link
           </div>
         </div>

@@ -16,6 +16,7 @@ export type Profile = {
   custom_bg_color: string;
   custom_card_color: string;
   custom_text_color: string;
+  layout_style: string;
   plan: Plan;
   youtube_channel_id: string | null;
   youtube_channel_title: string | null;

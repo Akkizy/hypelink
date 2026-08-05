@@ -3,11 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { createPublicClient } from "@/lib/supabase/public";
-import { getTheme, getCustomThemeVars } from "@/lib/themes";
-import { getFont } from "@/lib/fonts";
+import { getTheme, getCustomThemeVars, type Theme } from "@/lib/themes";
+import { getFont, type FontOption } from "@/lib/fonts";
 import { getAvatarShape } from "@/lib/avatar-shapes";
 import { getAvatarSize } from "@/lib/avatar-sizes";
 import { getBannerSize } from "@/lib/banner-sizes";
+import { getLayoutStyle } from "@/lib/layout-styles";
 import { groupLinksByCategory } from "@/lib/link-groups";
 import { TrackedLink } from "./tracked-link";
 import { PixBlockCard } from "./pix-block-card";
@@ -21,7 +22,7 @@ async function getProfileData(username: string) {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, display_name, bio, avatar_url, avatar_shape, avatar_size, banner_url, banner_size, banner_fade, theme, font, plan, youtube_channel_id, custom_bg_color, custom_card_color, custom_text_color",
+      "id, username, display_name, bio, avatar_url, avatar_shape, avatar_size, banner_url, banner_size, banner_fade, theme, font, layout_style, plan, youtube_channel_id, custom_bg_color, custom_card_color, custom_text_color",
     )
     .eq("username", username)
     .maybeSingle();
@@ -81,12 +82,107 @@ export default async function PublicProfilePage({
   const { profile, links, categories, pixBlocks } = data;
   const theme = getTheme(profile.theme);
   const font = getFont(profile.font);
+  const layoutStyle = getLayoutStyle(profile.layout_style);
+  const customVars = getCustomThemeVars(profile.theme, profile);
+  const groups = groupLinksByCategory(links, categories);
+  const isPoster = layoutStyle.id === "poster" && profile.plan === "pro";
+
+  const body = (
+    <>
+      {profile.plan === "pro" && profile.youtube_channel_id && (
+        <div className="mt-6 w-full">
+          <YouTubeStatus username={profile.username} theme={theme} />
+        </div>
+      )}
+
+      <div className="mt-8 flex w-full flex-col gap-5">
+        {groups.map((group) => (
+          <div key={group.key ?? "none"} className="flex w-full flex-col gap-3">
+            {group.title && (
+              <h2
+                className={`text-xs font-semibold uppercase tracking-wide ${isPoster ? "text-white/60" : theme.subtext}`}
+              >
+                {group.title}
+              </h2>
+            )}
+            {group.links.map((link) => (
+              <TrackedLink
+                key={link.id}
+                linkId={link.id}
+                href={link.url}
+                title={link.title}
+                className={`${theme.card} ${theme.link}`}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {pixBlocks.length > 0 && (
+        <div className="mt-6 flex w-full flex-col gap-3">
+          {pixBlocks.map((block) => (
+            <PixBlockCard key={block.id} block={block} theme={theme} />
+          ))}
+        </div>
+      )}
+
+      {profile.plan !== "pro" && (
+        <Link
+          href="/"
+          className={`mt-10 text-xs font-medium opacity-70 transition-opacity hover:opacity-100 ${
+            isPoster ? "text-white" : theme.subtext
+          }`}
+        >
+          feito com hyperlink
+        </Link>
+      )}
+    </>
+  );
+
+  if (isPoster) {
+    return (
+      <PosterHeader profile={profile} font={font}>
+        {body}
+      </PosterHeader>
+    );
+  }
+
+  return (
+    <ClassicHeader profile={profile} theme={theme} font={font} customVars={customVars}>
+      {body}
+    </ClassicHeader>
+  );
+}
+
+type HeaderProfile = {
+  username: string;
+  display_name: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  avatar_shape: string;
+  avatar_size: string;
+  banner_url: string | null;
+  banner_size: string;
+  banner_fade: boolean;
+};
+
+function ClassicHeader({
+  profile,
+  theme,
+  font,
+  customVars,
+  children,
+}: {
+  profile: HeaderProfile;
+  theme: Theme;
+  font: FontOption;
+  customVars: React.CSSProperties | undefined;
+  children: React.ReactNode;
+}) {
   const avatarShape = getAvatarShape(profile.avatar_shape);
   const avatarSize = getAvatarSize(profile.avatar_size);
   const bannerSize = getBannerSize(profile.banner_size);
-  const customVars = getCustomThemeVars(profile.theme, profile);
   const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
-  const groups = groupLinksByCategory(links, categories);
 
   return (
     <main style={customVars} className={`min-h-screen ${theme.page} ${font.className}`}>
@@ -128,44 +224,62 @@ export default async function PublicProfilePage({
         {profile.display_name && <p className={`text-sm ${theme.subtext}`}>@{profile.username}</p>}
         {profile.bio && <p className={`mt-2 text-center text-sm leading-relaxed ${theme.subtext}`}>{profile.bio}</p>}
 
-        {profile.plan === "pro" && profile.youtube_channel_id && (
-          <div className="mt-6 w-full">
-            <YouTubeStatus username={profile.username} theme={theme} />
-          </div>
-        )}
+        {children}
+      </div>
+    </main>
+  );
+}
 
-        <div className="mt-8 flex w-full flex-col gap-5">
-          {groups.map((group) => (
-            <div key={group.key ?? "none"} className="flex w-full flex-col gap-3">
-              {group.title && (
-                <h2 className={`text-xs font-semibold uppercase tracking-wide ${theme.subtext}`}>{group.title}</h2>
-              )}
-              {group.links.map((link) => (
-                <TrackedLink
-                  key={link.id}
-                  linkId={link.id}
-                  href={link.url}
-                  title={link.title}
-                  className={`${theme.card} ${theme.link}`}
-                />
-              ))}
+function PosterHeader({
+  profile,
+  font,
+  children,
+}: {
+  profile: HeaderProfile;
+  font: FontOption;
+  children: React.ReactNode;
+}) {
+  const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
+
+  return (
+    <main className={`relative min-h-screen overflow-hidden bg-neutral-950 ${font.className}`}>
+      {/* ambient blurred background */}
+      {profile.avatar_url && (
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <Image src={profile.avatar_url} alt="" fill className="scale-125 object-cover opacity-60 blur-3xl" />
+          <div className="absolute inset-0 bg-black/50" />
+        </div>
+      )}
+
+      <div className="relative mx-auto flex w-full max-w-sm flex-col items-center px-6 py-10 pb-16">
+        {/* poster card */}
+        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl shadow-2xl">
+          {profile.avatar_url ? (
+            <Image
+              src={profile.avatar_url}
+              alt={profile.display_name ?? profile.username}
+              fill
+              sizes="400px"
+              priority
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-neutral-800 text-6xl font-bold text-white">
+              {initial}
             </div>
-          ))}
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          <div className="absolute inset-x-0 bottom-5 px-5">
+            <p className="text-2xl font-extrabold text-white drop-shadow-md">
+              {profile.display_name ?? profile.username}
+            </p>
+            {profile.display_name && <p className="text-sm text-white/80">@{profile.username}</p>}
+          </div>
         </div>
 
-        {pixBlocks.length > 0 && (
-          <div className="mt-6 flex w-full flex-col gap-3">
-            {pixBlocks.map((block) => (
-              <PixBlockCard key={block.id} block={block} theme={theme} />
-            ))}
-          </div>
-        )}
+        {profile.bio && <p className="mt-4 text-center text-sm leading-relaxed text-white/80">{profile.bio}</p>}
 
-        {profile.plan !== "pro" && (
-          <Link href="/" className={`mt-10 text-xs font-medium ${theme.subtext} opacity-70 transition-opacity hover:opacity-100`}>
-            feito com hyperlink
-          </Link>
-        )}
+        {children}
       </div>
     </main>
   );

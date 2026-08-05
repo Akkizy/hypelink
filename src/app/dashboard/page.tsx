@@ -18,7 +18,7 @@ export default async function DashboardPage() {
     supabase
       .from("profiles")
       .select(
-        "username, display_name, bio, avatar_url, avatar_shape, avatar_size, banner_url, banner_size, banner_fade, theme, font, plan, custom_bg_color, custom_card_color, custom_text_color",
+        "username, display_name, bio, avatar_url, avatar_shape, avatar_size, banner_url, banner_size, banner_fade, theme, font, plan, custom_bg_color, custom_card_color, custom_text_color, layout_style",
       )
       .eq("id", user.id)
       .single(),

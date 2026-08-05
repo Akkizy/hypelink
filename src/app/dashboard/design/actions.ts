@@ -7,6 +7,7 @@ import { FONTS } from "@/lib/fonts";
 import { AVATAR_SHAPES } from "@/lib/avatar-shapes";
 import { AVATAR_SIZES } from "@/lib/avatar-sizes";
 import { BANNER_SIZES } from "@/lib/banner-sizes";
+import { LAYOUT_STYLES } from "@/lib/layout-styles";
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
@@ -32,6 +33,7 @@ export async function updateProfile(formData: FormData) {
   const customBg = String(formData.get("custom_bg_color") ?? "#ffffff");
   const customCard = String(formData.get("custom_card_color") ?? "#f5f5f5");
   const customText = String(formData.get("custom_text_color") ?? "#171717");
+  const layoutStyle = String(formData.get("layout_style") ?? "classic");
 
   const selectedTheme = THEMES.find((t) => t.id === theme);
   if (!selectedTheme || (selectedTheme.pro && !isPro)) {
@@ -65,6 +67,11 @@ export async function updateProfile(formData: FormData) {
     }
   }
 
+  const selectedLayout = LAYOUT_STYLES.find((l) => l.id === layoutStyle);
+  if (!selectedLayout || (selectedLayout.pro && !isPro)) {
+    throw new Error("Estilo de layout disponível apenas no plano PRO.");
+  }
+
   await supabase
     .from("profiles")
     .update({
@@ -79,6 +86,7 @@ export async function updateProfile(formData: FormData) {
       custom_bg_color: customBg,
       custom_card_color: customCard,
       custom_text_color: customText,
+      layout_style: layoutStyle,
     })
     .eq("id", user.id);
 
