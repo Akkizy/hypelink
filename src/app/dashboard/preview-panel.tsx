@@ -3,13 +3,23 @@ import { LinkIcon } from "@/lib/link-icons";
 import { getTheme } from "@/lib/themes";
 import { getFont } from "@/lib/fonts";
 import { getAvatarShape } from "@/lib/avatar-shapes";
+import { getBannerSize } from "@/lib/banner-sizes";
 import { groupLinksByCategory } from "@/lib/link-groups";
 import { PhoneFrame } from "@/components/phone-frame";
 import type { Link as LinkRow, LinkCategory, Profile } from "@/lib/supabase/types";
 
 type PreviewProfile = Pick<
   Profile,
-  "username" | "display_name" | "bio" | "avatar_url" | "avatar_shape" | "banner_url" | "theme" | "font"
+  | "username"
+  | "display_name"
+  | "bio"
+  | "avatar_url"
+  | "avatar_shape"
+  | "banner_url"
+  | "banner_size"
+  | "banner_fade"
+  | "theme"
+  | "font"
 >;
 
 export function PreviewPanel({
@@ -24,6 +34,7 @@ export function PreviewPanel({
   const theme = getTheme(profile.theme);
   const font = getFont(profile.font);
   const avatarShape = getAvatarShape(profile.avatar_shape);
+  const bannerSize = getBannerSize(profile.banner_size);
   const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
   const activeLinks = links.filter((l) => l.is_active);
   const groups = groupLinksByCategory(activeLinks, categories);
@@ -43,6 +54,8 @@ export function PreviewPanel({
 
       <PhoneFrame
         bannerClassName={theme.bannerFallback}
+        bannerHeightClass={bannerSize.previewClass}
+        bannerFadeToClass={profile.banner_fade ? theme.bannerFadeTo : undefined}
         bannerContent={
           profile.banner_url ? (
             // eslint-disable-next-line @next/next/no-img-element

@@ -2,10 +2,14 @@ export function PhoneFrame({
   children,
   bannerClassName,
   bannerContent,
+  bannerHeightClass = "h-28",
+  bannerFadeToClass,
 }: {
   children: React.ReactNode;
   bannerClassName: string;
   bannerContent?: React.ReactNode;
+  bannerHeightClass?: string;
+  bannerFadeToClass?: string;
 }) {
   return (
     <div className="relative mx-auto w-[260px] shrink-0 rounded-[2.75rem] bg-neutral-950 p-[10px] shadow-2xl">
@@ -20,7 +24,12 @@ export function PhoneFrame({
 
         {/* scrollable screen content */}
         <div className="h-full w-full overflow-y-auto">
-          <div className={`h-28 w-full shrink-0 ${bannerClassName} relative overflow-hidden`}>{bannerContent}</div>
+          <div className={`${bannerHeightClass} w-full shrink-0 ${bannerClassName} relative overflow-hidden`}>
+            {bannerContent}
+            {bannerFadeToClass && (
+              <div className={`absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent ${bannerFadeToClass}`} />
+            )}
+          </div>
           {children}
         </div>
       </div>

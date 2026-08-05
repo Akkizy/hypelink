@@ -8,6 +8,8 @@ export type Profile = {
   avatar_url: string | null;
   avatar_shape: string;
   banner_url: string | null;
+  banner_size: string;
+  banner_fade: boolean;
   theme: string;
   font: string;
   plan: Plan;

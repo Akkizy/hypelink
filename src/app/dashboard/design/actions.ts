@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { THEMES } from "@/lib/themes";
 import { FONTS } from "@/lib/fonts";
 import { AVATAR_SHAPES } from "@/lib/avatar-shapes";
+import { BANNER_SIZES } from "@/lib/banner-sizes";
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
@@ -21,6 +22,8 @@ export async function updateProfile(formData: FormData) {
   const theme = String(formData.get("theme") ?? "default");
   const font = String(formData.get("font") ?? "sans");
   const avatarShape = String(formData.get("avatar_shape") ?? "circle");
+  const bannerSize = String(formData.get("banner_size") ?? "medium");
+  const bannerFade = formData.get("banner_fade") === "on";
 
   const selectedTheme = THEMES.find((t) => t.id === theme);
   if (!selectedTheme || (selectedTheme.pro && profile.plan !== "pro")) {
@@ -36,6 +39,10 @@ export async function updateProfile(formData: FormData) {
     throw new Error("Formato de avatar inválido.");
   }
 
+  if (!BANNER_SIZES.some((s) => s.id === bannerSize)) {
+    throw new Error("Tamanho de banner inválido.");
+  }
+
   await supabase
     .from("profiles")
     .update({
@@ -44,6 +51,8 @@ export async function updateProfile(formData: FormData) {
       theme,
       font,
       avatar_shape: avatarShape,
+      banner_size: bannerSize,
+      banner_fade: bannerFade,
     })
     .eq("id", user.id);
 

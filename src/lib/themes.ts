@@ -9,6 +9,7 @@ export type Theme = {
   link: string;
   avatarBorder: string;
   bannerFallback: string;
+  bannerFadeTo: string;
   swatch: string;
 };
 
@@ -24,6 +25,7 @@ export const THEMES: Theme[] = [
     link: "border border-neutral-200",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-neutral-200 to-neutral-300",
+    bannerFadeTo: "to-neutral-50",
     swatch: "bg-neutral-100",
   },
   {
@@ -37,6 +39,7 @@ export const THEMES: Theme[] = [
     link: "",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-orange-300 via-pink-300 to-rose-300",
+    bannerFadeTo: "to-orange-50",
     swatch: "bg-gradient-to-br from-orange-200 to-pink-200",
   },
   {
@@ -50,6 +53,7 @@ export const THEMES: Theme[] = [
     link: "border border-emerald-200",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-emerald-300 to-teal-400",
+    bannerFadeTo: "to-emerald-50",
     swatch: "bg-emerald-100",
   },
   {
@@ -63,6 +67,7 @@ export const THEMES: Theme[] = [
     link: "border border-sky-200",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-sky-300 to-blue-400",
+    bannerFadeTo: "to-sky-50",
     swatch: "bg-sky-100",
   },
   {
@@ -76,6 +81,7 @@ export const THEMES: Theme[] = [
     link: "border border-violet-200",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-violet-300 to-purple-300",
+    bannerFadeTo: "to-violet-50",
     swatch: "bg-violet-100",
   },
   {
@@ -89,6 +95,7 @@ export const THEMES: Theme[] = [
     link: "border border-teal-200",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-teal-300 to-cyan-300",
+    bannerFadeTo: "to-teal-50",
     swatch: "bg-teal-100",
   },
   {
@@ -102,6 +109,7 @@ export const THEMES: Theme[] = [
     link: "",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-neutral-800 to-black",
+    bannerFadeTo: "to-neutral-950",
     swatch: "bg-neutral-800",
   },
   {
@@ -115,6 +123,7 @@ export const THEMES: Theme[] = [
     link: "",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-amber-700 via-amber-900 to-neutral-950",
+    bannerFadeTo: "to-amber-950",
     swatch: "bg-gradient-to-br from-amber-500 to-amber-800",
   },
   {
@@ -128,6 +137,7 @@ export const THEMES: Theme[] = [
     link: "",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-fuchsia-400 via-purple-400 to-indigo-500",
+    bannerFadeTo: "to-fuchsia-500",
     swatch: "bg-gradient-to-br from-fuchsia-400 via-purple-400 to-indigo-500",
   },
   {
@@ -141,6 +151,7 @@ export const THEMES: Theme[] = [
     link: "",
     avatarBorder: "border-neutral-950",
     bannerFallback: "bg-neutral-950",
+    bannerFadeTo: "to-white",
     swatch: "bg-neutral-950",
   },
   {
@@ -154,6 +165,7 @@ export const THEMES: Theme[] = [
     link: "border-2 border-pink-300",
     avatarBorder: "border-white",
     bannerFallback: "bg-gradient-to-br from-pink-400 via-fuchsia-400 to-yellow-300",
+    bannerFadeTo: "to-pink-100",
     swatch: "bg-gradient-to-br from-pink-300 via-fuchsia-300 to-yellow-200",
   },
 ];

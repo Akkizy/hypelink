@@ -6,6 +6,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { getTheme } from "@/lib/themes";
 import { getFont } from "@/lib/fonts";
 import { getAvatarShape } from "@/lib/avatar-shapes";
+import { getBannerSize } from "@/lib/banner-sizes";
 import { groupLinksByCategory } from "@/lib/link-groups";
 import { TrackedLink } from "./tracked-link";
 import { PixBlockCard } from "./pix-block-card";
@@ -19,7 +20,7 @@ async function getProfileData(username: string) {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "id, username, display_name, bio, avatar_url, avatar_shape, banner_url, theme, font, plan, youtube_channel_id",
+      "id, username, display_name, bio, avatar_url, avatar_shape, banner_url, banner_size, banner_fade, theme, font, plan, youtube_channel_id",
     )
     .eq("username", username)
     .maybeSingle();
@@ -80,15 +81,19 @@ export default async function PublicProfilePage({
   const theme = getTheme(profile.theme);
   const font = getFont(profile.font);
   const avatarShape = getAvatarShape(profile.avatar_shape);
+  const bannerSize = getBannerSize(profile.banner_size);
   const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
   const groups = groupLinksByCategory(links, categories);
 
   return (
     <main className={`min-h-screen ${theme.page} ${font.className}`}>
       {/* Banner */}
-      <div className={`h-40 w-full sm:h-56 ${theme.bannerFallback} relative overflow-hidden`}>
+      <div className={`${bannerSize.publicClass} w-full ${theme.bannerFallback} relative overflow-hidden`}>
         {profile.banner_url && (
           <Image src={profile.banner_url} alt="" fill priority className="object-cover" sizes="100vw" />
+        )}
+        {profile.banner_fade && (
+          <div className={`absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-b from-transparent ${theme.bannerFadeTo}`} />
         )}
       </div>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Theme } from "@/lib/themes";
 import type { FontOption } from "@/lib/fonts";
 import type { AvatarShape } from "@/lib/avatar-shapes";
+import type { BannerSize } from "@/lib/banner-sizes";
 import { PhoneFrame } from "@/components/phone-frame";
 import { updateProfile } from "./actions";
 import { ImageUploadField } from "./image-upload-field";
@@ -20,6 +21,8 @@ type ProfileInput = {
   avatar_url: string | null;
   avatar_shape: string;
   banner_url: string | null;
+  banner_size: string;
+  banner_fade: boolean;
 };
 
 export function DesignForm({
@@ -27,15 +30,19 @@ export function DesignForm({
   themes,
   fonts,
   avatarShapes,
+  bannerSizes,
 }: {
   profile: ProfileInput;
   themes: Theme[];
   fonts: FontOption[];
   avatarShapes: AvatarShape[];
+  bannerSizes: BannerSize[];
 }) {
   const [theme, setTheme] = useState(profile.theme);
   const [font, setFont] = useState(profile.font);
   const [avatarShape, setAvatarShape] = useState(profile.avatar_shape);
+  const [bannerSize, setBannerSize] = useState(profile.banner_size);
+  const [bannerFade, setBannerFade] = useState(profile.banner_fade);
   const [displayName, setDisplayName] = useState(profile.display_name ?? "");
   const [bio, setBio] = useState(profile.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? "");
@@ -47,6 +54,7 @@ export function DesignForm({
   const activeTheme = themes.find((t) => t.id === theme) ?? themes[0];
   const activeFont = fonts.find((f) => f.id === font) ?? fonts[0];
   const activeShape = avatarShapes.find((s) => s.id === avatarShape) ?? avatarShapes[0];
+  const activeBannerSize = bannerSizes.find((s) => s.id === bannerSize) ?? bannerSizes[0];
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_260px]">
@@ -111,6 +119,33 @@ export function DesignForm({
               </button>
             ))}
           </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Tamanho do banner</label>
+          <input type="hidden" name="banner_size" value={bannerSize} />
+          <div className="flex gap-2">
+            {bannerSizes.map((s) => (
+              <button
+                type="button"
+                key={s.id}
+                onClick={() => setBannerSize(s.id)}
+                className={`flex flex-col items-center gap-1.5 rounded-lg p-2 ${
+                  bannerSize === s.id ? "ring-2 ring-black" : "ring-1 ring-black/10"
+                }`}
+              >
+                <span
+                  className={`block w-14 rounded-md bg-neutral-300 ${
+                    s.id === "short" ? "h-4" : s.id === "tall" ? "h-8" : "h-6"
+                  }`}
+                />
+                <span className="text-[11px] text-black/70">{s.label}</span>
+              </button>
+            ))}
+          </div>
+          <label className="mt-1 flex items-center gap-2 text-sm text-black/70">
+            <input type="checkbox" name="banner_fade" defaultChecked={bannerFade} onChange={(e) => setBannerFade(e.target.checked)} />
+            Esmaecer o banner até a cor do tema
+          </label>
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Bio</label>
@@ -203,6 +238,8 @@ export function DesignForm({
           theme={activeTheme}
           font={activeFont}
           avatarShape={activeShape}
+          bannerSize={activeBannerSize}
+          bannerFade={bannerFade}
           displayName={displayName}
           username={profile.username}
           bio={bio}
@@ -218,6 +255,8 @@ function PreviewCard({
   theme,
   font,
   avatarShape,
+  bannerSize,
+  bannerFade,
   displayName,
   username,
   bio,
@@ -227,6 +266,8 @@ function PreviewCard({
   theme: Theme;
   font: FontOption;
   avatarShape: AvatarShape;
+  bannerSize: BannerSize;
+  bannerFade: boolean;
   displayName: string;
   username: string;
   bio: string;
@@ -238,6 +279,8 @@ function PreviewCard({
   return (
     <PhoneFrame
       bannerClassName={theme.bannerFallback}
+      bannerHeightClass={bannerSize.previewClass}
+      bannerFadeToClass={bannerFade ? theme.bannerFadeTo : undefined}
       bannerContent={
         bannerUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

@@ -17,7 +17,9 @@ export default async function DashboardPage() {
     supabase.from("link_categories").select("*").eq("profile_id", user.id).order("position", { ascending: true }),
     supabase
       .from("profiles")
-      .select("username, display_name, bio, avatar_url, avatar_shape, banner_url, theme, font, plan")
+      .select(
+        "username, display_name, bio, avatar_url, avatar_shape, banner_url, banner_size, banner_fade, theme, font, plan",
+      )
       .eq("id", user.id)
       .single(),
   ]);
