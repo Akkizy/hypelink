@@ -125,9 +125,10 @@ export default async function PublicProfilePage({
       {(profile.plan !== "pro" || isPoster) && (
         <Link
           href="/"
-          className={`mt-10 text-xs font-medium opacity-70 transition-opacity hover:opacity-100 ${theme.subtext}`}
+          className="mt-12 flex flex-col items-center gap-0.5 text-center opacity-70 transition-opacity hover:opacity-100"
         >
-          feito com hyperlink
+          <span className={`text-[10px] font-medium ${theme.subtext}`}>feito com</span>
+          <span className={`text-lg font-extrabold ${theme.text}`}>hyperlink</span>
         </Link>
       )}
     </>
