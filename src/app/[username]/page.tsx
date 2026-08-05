@@ -268,7 +268,7 @@ function PosterHeader({
               </div>
             )}
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-            <div className="absolute inset-x-0 bottom-6 px-6">
+            <div className="absolute inset-x-0 bottom-6 px-6 text-center">
               <p className="text-3xl font-extrabold text-white drop-shadow-md">
                 {profile.display_name ?? profile.username}
               </p>

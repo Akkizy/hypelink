@@ -517,7 +517,7 @@ function PosterPreviewCard({
               </div>
             )}
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-            <div className="absolute inset-x-0 bottom-3 px-3">
+            <div className="absolute inset-x-0 bottom-3 px-3 text-center">
               <p className="text-sm font-extrabold text-white drop-shadow-md">{displayName || `@${username}`}</p>
             </div>
           </div>
