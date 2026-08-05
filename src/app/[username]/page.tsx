@@ -99,11 +99,7 @@ export default async function PublicProfilePage({
         {groups.map((group) => (
           <div key={group.key ?? "none"} className="flex w-full flex-col gap-3">
             {group.title && (
-              <h2
-                className={`text-xs font-semibold uppercase tracking-wide ${isPoster ? "text-white/60" : theme.subtext}`}
-              >
-                {group.title}
-              </h2>
+              <h2 className={`text-xs font-semibold uppercase tracking-wide ${theme.subtext}`}>{group.title}</h2>
             )}
             {group.links.map((link) => (
               <TrackedLink
@@ -129,9 +125,7 @@ export default async function PublicProfilePage({
       {profile.plan !== "pro" && (
         <Link
           href="/"
-          className={`mt-10 text-xs font-medium opacity-70 transition-opacity hover:opacity-100 ${
-            isPoster ? "text-white" : theme.subtext
-          }`}
+          className={`mt-10 text-xs font-medium opacity-70 transition-opacity hover:opacity-100 ${theme.subtext}`}
         >
           feito com hyperlink
         </Link>
@@ -141,7 +135,7 @@ export default async function PublicProfilePage({
 
   if (isPoster) {
     return (
-      <PosterHeader profile={profile} font={font}>
+      <PosterHeader profile={profile} theme={theme} font={font} customVars={customVars}>
         {body}
       </PosterHeader>
     );
@@ -232,11 +226,15 @@ function ClassicHeader({
 
 function PosterHeader({
   profile,
+  theme,
   font,
+  customVars,
   children,
 }: {
   profile: HeaderProfile;
+  theme: Theme;
   font: FontOption;
+  customVars: React.CSSProperties | undefined;
   children: React.ReactNode;
 }) {
   const initial = (profile.display_name ?? profile.username).slice(0, 1).toUpperCase();
@@ -279,7 +277,10 @@ function PosterHeader({
 
         {profile.bio && <p className="mt-4 text-center text-sm leading-relaxed text-white/80">{profile.bio}</p>}
 
-        {children}
+        {/* rounded panel — colors follow the chosen theme */}
+        <div style={customVars} className={`mt-6 w-full rounded-3xl p-5 shadow-xl ${theme.page}`}>
+          {children}
+        </div>
       </div>
     </main>
   );

@@ -91,8 +91,10 @@ export function PreviewPanel({
               </div>
             </div>
             {profile.bio && <p className="relative mt-3 text-center text-[11px] leading-snug text-white/80">{profile.bio}</p>}
-            <div className="relative mt-4 flex w-full flex-col gap-3">
-              <LinkGroups groups={groups} cardClassName="bg-white/90 text-neutral-900" subtextClassName="text-white/60" />
+            <div style={customVars} className={`relative mt-4 w-full rounded-2xl p-3 shadow-lg ${theme.page}`}>
+              <div className="flex w-full flex-col gap-3">
+                <LinkGroups groups={groups} cardClassName={`${theme.card} ${theme.link}`} subtextClassName={theme.subtext} />
+              </div>
             </div>
           </div>
         </PhoneFrame>

@@ -367,7 +367,19 @@ export function DesignForm({
       <div className="lg:sticky lg:top-6 lg:self-start">
         <p className="mb-2 text-xs font-medium text-black/50">Prévia</p>
         {isPoster ? (
-          <PosterPreviewCard font={activeFont} displayName={displayName} username={profile.username} bio={bio} avatarUrl={avatarUrl} />
+          <PosterPreviewCard
+            theme={activeTheme}
+            font={activeFont}
+            customVars={getCustomThemeVars(theme, {
+              custom_bg_color: customBg,
+              custom_card_color: customCard,
+              custom_text_color: customText,
+            })}
+            displayName={displayName}
+            username={profile.username}
+            bio={bio}
+            avatarUrl={avatarUrl}
+          />
         ) : (
           <PreviewCard
             theme={activeTheme}
@@ -466,13 +478,17 @@ function PreviewCard({
 }
 
 function PosterPreviewCard({
+  theme,
   font,
+  customVars,
   displayName,
   username,
   bio,
   avatarUrl,
 }: {
+  theme: Theme;
   font: FontOption;
+  customVars: React.CSSProperties | undefined;
   displayName: string;
   username: string;
   bio: string;
@@ -505,12 +521,15 @@ function PosterPreviewCard({
           </div>
         </div>
         {bio && <p className="relative mt-3 text-center text-[11px] leading-snug text-white/80">{bio}</p>}
-        <div className="relative mt-4 flex w-full flex-col gap-1.5">
-          <div className="flex h-9 w-full items-center justify-center rounded-lg bg-white/90 text-[11px] font-medium text-neutral-900">
-            seu link aqui
-          </div>
-          <div className="flex h-9 w-full items-center justify-center rounded-lg bg-white/90 text-[11px] font-medium text-neutral-900">
-            outro link
+
+        <div style={customVars} className={`relative mt-4 w-full rounded-2xl p-3 shadow-lg ${theme.page}`}>
+          <div className="flex w-full flex-col gap-1.5">
+            <div className={`flex h-9 w-full items-center justify-center rounded-lg text-[11px] font-medium ${theme.card} ${theme.link}`}>
+              seu link aqui
+            </div>
+            <div className={`flex h-9 w-full items-center justify-center rounded-lg text-[11px] font-medium ${theme.card} ${theme.link}`}>
+              outro link
+            </div>
           </div>
         </div>
       </div>
