@@ -1,10 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
+import { Suspense, useActionState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { login, type AuthState } from "../actions";
 
 const initialState: AuthState = { error: null };
+
+function ConfirmationNotice() {
+  const searchParams = useSearchParams();
+  if (searchParams.get("error") !== "confirmation_failed") return null;
+
+  return (
+    <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+      O link de confirmação expirou ou já foi usado. Tente entrar normalmente ou crie uma conta de novo.
+    </p>
+  );
+}
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState);
@@ -12,6 +24,9 @@ export default function LoginPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
       <h1 className="mb-6 text-2xl font-bold">Entrar</h1>
+      <Suspense fallback={null}>
+        <ConfirmationNotice />
+      </Suspense>
       <form action={formAction} className="flex flex-col gap-4">
         <input
           name="email"

@@ -9,6 +9,24 @@ const initialState: AuthState = { error: null };
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signup, initialState);
 
+  if (state.message) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 text-center">
+        <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl">
+          ✉️
+        </span>
+        <h1 className="mb-2 text-xl font-bold">Confirme seu e-mail</h1>
+        <p className="text-sm text-black/60">{state.message}</p>
+        <p className="mt-6 text-sm text-black/60">
+          Não recebeu?{" "}
+          <Link href="/signup" className="font-medium text-black underline">
+            Tentar de novo
+          </Link>
+        </p>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
       <h1 className="mb-1 text-2xl font-bold">Criar sua página</h1>

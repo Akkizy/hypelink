@@ -4,7 +4,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isValidUsername } from "@/lib/utils";
 
-export type AuthState = { error: string | null };
+export type AuthState = { error: string | null; message?: string | null };
+
+function siteUrl() {
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+}
 
 export async function signup(_prevState: AuthState, formData: FormData): Promise<AuthState> {
   const email = String(formData.get("email") ?? "").trim();
@@ -30,14 +34,25 @@ export async function signup(_prevState: AuthState, formData: FormData): Promise
     return { error: "Esse nome de usuário já está em uso." };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { username } },
+    options: {
+      data: { username },
+      emailRedirectTo: `${siteUrl()}/auth/callback`,
+    },
   });
 
   if (error) {
     return { error: error.message };
+  }
+
+  // If email confirmation is required, Supabase returns a user but no session yet.
+  if (data.user && !data.session) {
+    return {
+      error: null,
+      message: "Quase lá! Enviamos um link de confirmação para o seu e-mail — clique nele para ativar sua conta.",
+    };
   }
 
   redirect("/dashboard");
@@ -51,6 +66,9 @@ export async function login(_prevState: AuthState, formData: FormData): Promise<
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    if (error.code === "email_not_confirmed") {
+      return { error: "Confirme seu e-mail antes de entrar — veja o link que enviamos pra sua caixa de entrada." };
+    }
     return { error: "E-mail ou senha inválidos." };
   }
 
